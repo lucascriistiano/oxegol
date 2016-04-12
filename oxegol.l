@@ -16,6 +16,7 @@ digitos [0-9]+
 
 /* Expressoes Regulares e acoes */
 %%
+"principal"    { printf("PRINCIPAL\n"); }
 "procedimento"    { printf("PROCEDIMENTO\n"); }
 "funcao"          { printf("FUNCAO\n"); }
 "retorne"         { printf("RETORNE\n"); }
@@ -55,23 +56,27 @@ digitos [0-9]+
 ";"        { printf("PONTO_E_VIRGULA\n"); }
 "="        { printf("ATRIBUICAO\n"); }
 
-
-[a-zA-Z][a-zA-Z0-9\_]* { printf("ID\n"); }
-
-
-{digitos}                                 { printf("LITERAL_INTEIRO\n"); }
-({digitos}\.[0-9]*) | ([0-9]*\.{digitos}) { printf("LITERAL_REAL\n"); }
-\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING\n"); }
-"."                                       { printf("LITERAL_CARACTERE\n"); }
-"verdadeiro" | "falso"                    { printf("LIT_BOOLEANO\n"); }
-
+"verdadeiro"                    { printf("LIT_BOOLEANO_VERDADEIRO\n"); }
+"falso"                    { printf("LIT_BOOLEANO_FALSO\n"); }
 
 "e"        { printf("E_LOGICO\n"); }
 "ou"       { printf("OU_LOGICO\n"); }
 "nao"      { printf("NAO_LOGICO\n"); }
 
 
-"->"       { printf("RETORNA\n"); }
+
+[a-zA-Z][a-zA-Z0-9\_]* { printf("ID\n"); }
+
+
+{digitos}                                 { printf("LITERAL_INTEIRO\n"); }
+
+({digitos}\.[0-9]*)  					{ printf("LITERAL_REAL\n"); }
+([0-9]*\.{digitos}) 					{ printf("LITERAL_REAL\n"); }
+
+\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING\n"); }
+"."                                       { printf("LITERAL_CARACTERE\n"); }
+
+"->"       { printf("RETORNENA\n"); }
 "+"        { printf("MAIS\n"); }
 "-"        { printf("MENOS\n"); }
 "*"        { printf("ASTERISCO\n"); }
