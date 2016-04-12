@@ -74,9 +74,9 @@ digitos [0-9]+
 ([0-9]*\.{digitos}) 					{ printf("LITERAL_REAL\n"); }
 
 \"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING\n"); }
-"."                                       { printf("LITERAL_CARACTERE\n"); }
+'.'                                       { printf("LITERAL_CARACTERE\n"); }
 
-"->"       { printf("RETORNENA\n"); }
+"->"       { printf("RETORNA\n"); }
 "+"        { printf("MAIS\n"); }
 "-"        { printf("MENOS\n"); }
 "*"        { printf("ASTERISCO\n"); }
@@ -92,8 +92,10 @@ digitos [0-9]+
 ">>"       { printf("DESLOCAMENTO_DIR\n"); }
 "<<"       { printf("DESLOCAMENTO_ESQ\n"); }
 
-"/*"[a-zA-Z0-9\_]*"*/" { /* Nao faz nada para comentarios */ }
+"/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios */ }
 [ \n\t\r]+               { /* Nao faz nada para espacos em branco */ }
 
 .          { printf("Padrao desconhecido - %s\n", yytext); }
+
+
 %%
