@@ -8,7 +8,8 @@
 /* Declaracoes C */
 %{
 #include "tokens.h"
-// union { int ival; string sval; double fval; char cval; } yylval;
+//#include "string.h"
+//union { int ival; string sval; double fval; char cval; } yylval;
 %}
 
 /* Definicoes Lex */
@@ -16,7 +17,7 @@ digitos [0-9]+
 
 /* Expressoes Regulares e acoes */
 %%
-"principal"    { printf("PRINCIPAL\n"); }
+"principal"       { printf("PRINCIPAL\n"); }
 "procedimento"    { printf("PROCEDIMENTO\n"); }
 "funcao"          { printf("FUNCAO\n"); }
 "retorne"         { printf("RETORNE\n"); }
@@ -29,7 +30,7 @@ digitos [0-9]+
 "enquanto"        { printf("ENQUANTO\n"); }
 "escolha"         { printf("ESCOLHA\n"); }
 "caso"            { printf("CASO\n"); }
-"casocontrario"   { printf("CASO_CONTRARIO\n"); }
+"casocontrario"   { printf("CASOCONTRARIO\n"); }
 "se"              { printf("SE\n"); }
 "senao"           { printf("SENAO\n"); }
 "entao"           { printf("ENTAO\n"); }
@@ -56,25 +57,6 @@ digitos [0-9]+
 ";"        { printf("PONTO_E_VIRGULA\n"); }
 "="        { printf("ATRIBUICAO\n"); }
 
-"verdadeiro"                    { printf("LIT_BOOLEANO_VERDADEIRO\n"); }
-"falso"                    { printf("LIT_BOOLEANO_FALSO\n"); }
-
-"e"        { printf("E_LOGICO\n"); }
-"ou"       { printf("OU_LOGICO\n"); }
-"nao"      { printf("NAO_LOGICO\n"); }
-
-
-
-[a-zA-Z][a-zA-Z0-9\_]* { printf("ID\n"); }
-
-
-{digitos}                                 { printf("LITERAL_INTEIRO\n"); }
-
-({digitos}\.[0-9]*)  					{ printf("LITERAL_REAL\n"); }
-([0-9]*\.{digitos}) 					{ printf("LITERAL_REAL\n"); }
-
-\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING\n"); }
-'.'                                       { printf("LITERAL_CARACTERE\n"); }
 
 "->"       { printf("RETORNA\n"); }
 "+"        { printf("MAIS\n"); }
@@ -87,15 +69,28 @@ digitos [0-9]+
 ">="       { printf("MAIOR_IGUAL\n"); }
 "=="       { printf("IGUAL\n"); }
 "%"        { printf("MOD\n"); }
-"&&"       { printf("E_BINARIO\n"); }
-"||"       { printf("OU_BINARIO\n"); }
+"&"        { printf("E_BITS\n"); }
+"|"        { printf("OU_BITS\n"); }
 ">>"       { printf("DESLOCAMENTO_DIR\n"); }
 "<<"       { printf("DESLOCAMENTO_ESQ\n"); }
 
-"/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios */ }
-[ \n\t\r]+               { /* Nao faz nada para espacos em branco */ }
+
+"e"        { printf("E_LOGICO\n"); }
+"ou"       { printf("OU_LOGICO\n"); }
+"nao"      { printf("NAO_LOGICO\n"); }
+
+
+{digitos}                                 { printf("LITERAL_INTEIRO\n"); }
+(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { printf("LITERAL_REAL\n"); }
+("verdadeiro"|"falso")                    { printf("LITERAL_BOOLEANO\n"); }
+\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING\n"); }
+'.'                                       { printf("LITERAL_CARACTERE\n"); }
+
+[a-zA-Z][a-zA-Z0-9\_]* { printf("ID\n"); }
+
+"/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios multi linhas */ }
+[ \n\t\r]+                      { /* Nao faz nada para espacos em branco */ }
 
 .          { printf("Padrao desconhecido - %s\n", yytext); }
-
 
 %%
