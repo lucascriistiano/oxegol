@@ -80,17 +80,17 @@ digitos [0-9]+
 "nao"      { printf("NAO_LOGICO\n"); }
 
 
-{digitos}                                 { printf("LITERAL_INTEIRO\n"); }
-(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { printf("LITERAL_REAL\n"); }
-("verdadeiro"|"falso")                    { printf("LITERAL_BOOLEANO\n"); }
-\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING\n"); }
-'.'                                       { printf("LITERAL_CARACTERE\n"); }
+{digitos}                                 { printf("LITERAL_INTEIRO: %d\n", atoi(yytext)); }
+(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { printf("LITERAL_REAL: %f\n", atof(yytext)); }
+("verdadeiro"|"falso")                    { printf("LITERAL_BOOLEANO: %s\n", yytext); }
+\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING: %s\n", yytext); }
+'.'                                       { printf("LITERAL_CARACTERE: %s\n", yytext); }
 
-[a-zA-Z][a-zA-Z0-9\_]* { printf("ID\n"); }
+[a-zA-Z][a-zA-Z0-9\_]* { printf("ID: %s\n", yytext); }
 
 "/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios multi linhas */ }
 [ \n\t\r]+                      { /* Nao faz nada para espacos em branco */ }
 
-.          { printf("Padrao desconhecido - %s\n", yytext); }
+.          { printf("Padrao desconhecido: %s\n", yytext); }
 
 %%
