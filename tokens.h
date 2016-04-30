@@ -24,43 +24,45 @@
 #define BYTE            31
 #define REGISTRO        32
 
+#define REFERENCIA      33
 
-#define DOIS_PONTOS     33
-#define PAR_ESQ         34
-#define PAR_DIR         35
-#define CHAVE_ESQ       36
-#define CHAVE_DIR       37
-#define COLCHETE_ESQ    38
-#define COLCHETE_DIR    39
-#define VIRGULA         40
-#define PONTO_E_VIRGULA 41
-#define ATRIBUICAO      42
+#define DOIS_PONTOS     34
+#define PAR_ESQ         35
+#define PAR_DIR         36
+#define CHAVE_ESQ       37
+#define CHAVE_DIR       38
+#define COLCHETE_ESQ    39
+#define COLCHETE_DIR    40
+#define VIRGULA         41
+#define PONTO_E_VIRGULA 42
+#define ATRIBUICAO      43
 
+#define RETORNA          44
+#define MAIS             45
+#define MENOS            46
+#define ASTERISCO        47
+#define BARRA            48
+#define MENOR            49
+#define MAIOR            50
+#define MENOR_IGUAL      51
+#define MAIOR_IGUAL      52
+#define IGUAL            53
+#define MOD              54
+#define E_BITS           55
+#define OU_BITS          56
+#define XOR_BITS         57
+#define DESLOCAMENTO_ESQ 58
+#define DESLOCAMENTO_DIR 59
+#define NAO_BITS         60
 
-#define RETORNA          43
-#define MAIS             44
-#define MENOS            45
-#define ASTERISCO        46
-#define BARRA            47
-#define MENOR            48
-#define MAIOR            49
-#define MENOR_IGUAL      50
-#define MAIOR_IGUAL      51
-#define IGUAL            52
-#define MOD              53
-#define E_BITS           54
-#define OU_BITS          55
-#define DESLOCAMENTO_DIR 56
-#define DESLOCAMENTO_ESQ 57
+#define E_LOGICO         61
+#define OU_LOGICO        62
+#define NAO_LOGICO       63
 
-#define E_LOGICO         58
-#define OU_LOGICO        59
-#define NAO_LOGICO       60
+#define LITERAL_INTEIRO   64
+#define LITERAL_REAL      65
+#define LITERAL_BOOLEANO  66
+#define LITERAL_STRING    67
+#define LITERAL_CARACTERE 68
 
-#define LITERAL_INTEIRO   61
-#define LITERAL_REAL      62
-#define LITERAL_BOOLEANO  63
-#define LITERAL_STRING    64
-#define LITERAL_CARACTERE 65
-
-#define ID                66
+#define ID                69

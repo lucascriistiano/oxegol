@@ -8,8 +8,14 @@
 /* Declaracoes C */
 %{
 #include "tokens.h"
-//#include "string.h"
-//union { int ival; string sval; double fval; char cval; } yylval;
+// #include "string.h"
+
+union {
+    int ival;
+    // string sval;
+    double fval;
+    char cval;
+} yylval;
 %}
 
 /* Definicoes Lex */
@@ -46,6 +52,9 @@ digitos [0-9]+
 "registro"   { printf("REGISTRO\n"); return REGISTRO; }
 
 
+"ref"        { printf("REFERENCIA\n"); return REFERENCIA; }
+
+
 ":"        { printf("DOIS_PONTOS\n"); return DOIS_PONTOS; }
 "("        { printf("PAR_ESQ\n"); return PAR_ESQ; }
 ")"        { printf("PAR_DIR\n"); return PAR_DIR; }
@@ -71,8 +80,10 @@ digitos [0-9]+
 "%"        { printf("MOD\n"); return MOD; }
 "&"        { printf("E_BITS\n"); return E_BITS; }
 "|"        { printf("OU_BITS\n"); return OU_BITS; }
-">>"       { printf("DESLOCAMENTO_DIR\n"); return DESLOCAMENTO_DIR; }
+"^"        { printf("XOR_BITS\n"); return XOR_BITS; }
 "<<"       { printf("DESLOCAMENTO_ESQ\n"); return DESLOCAMENTO_ESQ; }
+">>"       { printf("DESLOCAMENTO_DIR\n"); return DESLOCAMENTO_DIR; }
+"~"        { printf("NAO_BITS\n"); return NAO_BITS; }
 
 
 "e"        { printf("E_LOGICO\n"); return E_LOGICO; }
