@@ -1,14 +1,14 @@
 
-programa: declaracao_zero_mais bloco_declaracao_variaveis PRINCIPAL CHAVE_ESQ comandos_zero_mais CHAVE_DIR
+programa: declaracoes_var_opc declaracoes_opc principal
           ;
 
-bloco_declaracao_variaveis: /* vazio */
-                           |
+principal: PRINCIPAL CHAVE_ESQ comandos_opc CHAVE_DIR
+           ;
 
-declaracao_zero_mais:  /* vazio */
-                      |
-                      declaracao PONTO_E_VIRGULA declaracao_zero_mais
-                      ;
+declaracoes_opc: /* vazio */
+                 |
+                 declaracao declaracoes_opc
+                 ;
 
 declaracao: declaracao_registro
             |
@@ -20,23 +20,29 @@ declaracao: declaracao_registro
 declaracao_registro: REGISTRO ID CHAVE_ESQ campo_um_mais CHAVE_DIR
                      ;
 
-declaracao_func: FUNCAO ID PAR_ESQ parametros_formais_opc PAR_DIR RETORNA tipo CHAVE_ESQ comandos_zero_mais CHAVE_DIR
+declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo CHAVE_ESQ comandos_opc CHAVE_DIR
                  ;
 
-parametros_formais_opc: /* vazio */
-                        |
-                        parametros_formais
-                        ;
+declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
+                 ;
 
-parametros_formais: parametro_formal
-                    |
-                    VIRGULA parametro_formal parametros_formais
-                    ;
+parametros_opc: /* vazio */
+                |
+                parametros
+                ;
 
-parametros_reais: expressao
-                  |
-                  VIRGULA expressao parametros_reais
-                  ;
+parametros: parametro
+            |
+            VIRGULA parametro parametros
+            ;
+
+parametro: ref_opc tipo ID
+           ;
+
+argumentos: expressao
+            |
+            VIRGULA expressao argumentos
+            ;
 
 ref_opc: /* vazio */
          |
@@ -58,13 +64,10 @@ tipo: INTEIRO
       ID
       ;
 
-declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_formais_opc PAR_DIR CHAVE_ESQ comandos_zero_mais CHAVE_DIR
-                 ;
-
-declaracao_var_zero_mais: /* vazio */
-                          |
-                          declaracao_var declaracao_var_zero_mais
-                          ;
+declaracoes_var_opc: /* vazio */
+                     |
+                     declaracao_var declaracoes_var_opc
+                     ;
 
 declaracao_var: declaracao_var_primitiva
                 |
@@ -92,10 +95,10 @@ array_um_mais: COLCHETE_ESQ expressao COLCHETE_DIR
 declaracao_var_registro: ID ID
                          ;
 
-comandos_zero_mais: /* vazio */
-                    |
-                    comando PONTO_E_VIRGULA comandos_zero_mais
-                    ;
+comandos_opc: /* vazio */
+              |
+              comando PONTO_E_VIRGULA comandos_opc
+              ;
 
 comando: se
          |
@@ -110,23 +113,23 @@ comando: se
          PARE
          ;
 
-se: SE PAR_ESQ expressao_logica PAR_DIR CHAVE_ESQ comandos_zero_mais CHAVE_DIR senao_zero_mais
+se: SE PAR_ESQ expressao_logica PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR senao_opc
     ;
 
-senao_zero_mais: /* vazio */
-                 |
-                 senao
-                 |
-                 senao_se
-                 ;
+senao_opc: /* vazio */
+           |
+           senao
+           |
+           senao_se
+           ;
 
-senao: SENAO CHAVE_ESQ comandos_zero_mais CHAVE_DIR
+senao: SENAO CHAVE_ESQ comandos_opc CHAVE_DIR
        ;
 
 senao_se: SENAO se
           ;
 
-para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR CHAVE_ESQ comandos_zero_mais CHAVE_DIR
+para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
       ;
 
 escolha: ESCOLHA PAR_ESQ expressao PAR_DIR CHAVE_ESQ caso_um_mais caso_contrario_opc CHAVE_DIR
@@ -137,7 +140,7 @@ caso_contrario_opc: /* vazio */
                     caso_contrario
                     ;
 
-caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_zero_mais
+caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc
                 ;
 
 caso_um_mais: caso
@@ -145,10 +148,10 @@ caso_um_mais: caso
               caso caso_um_mais
               ;
 
-caso: CASO literal DOIS_PONTOS comandos_zero_mais
+caso: CASO literal DOIS_PONTOS comandos_opc
       ;
 
-enquanto: ENQUANTO PAR_ESQ expressao> PAR_DIR CHAVE_ESQ comandos_zero_mais CHAVE_DIR
+enquanto: ENQUANTO PAR_ESQ expressao> PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
           ;
 
 retorne: RETORNE expressao_opc
@@ -217,7 +220,7 @@ expressao: chamada_funcao
            PAR_ESQ expressao PAR_DIR
            ;
 
-chamada_funcao: ID PAR_ESQ parametros_reais PAR_DIR
+chamada_funcao: ID PAR_ESQ argumentos PAR_DIR
                 ;
 
 literal: LITERAL_INTEIRO
