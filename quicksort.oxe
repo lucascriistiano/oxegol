@@ -24,8 +24,7 @@ procedimento quickSort(inteiro vetor[10], inteiro esquerdo, inteiro direito) {
     }
 }
 
-
-principal{
+principal {
     inteiro vetor[10] = {5,7,8,2,3,1,0,10,20,32};
     quickSort(vetor, vetor[0], vetor[9]);
 }

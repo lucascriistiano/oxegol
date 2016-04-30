@@ -17,76 +17,76 @@ digitos [0-9]+
 
 /* Expressoes Regulares e acoes */
 %%
-"principal"       { printf("PRINCIPAL\n"); }
-"procedimento"    { printf("PROCEDIMENTO\n"); }
-"funcao"          { printf("FUNCAO\n"); }
-"retorne"         { printf("RETORNE\n"); }
+"principal"       { printf("PRINCIPAL\n"); return PRINCIPAL; }
+"procedimento"    { printf("PROCEDIMENTO\n"); return PROCEDIMENTO; }
+"funcao"          { printf("FUNCAO\n"); return FUNCAO; }
+"retorne"         { printf("RETORNE\n"); return RETORNE; }
 
 
-"para"            { printf("PARA\n"); }
-"de"              { printf("DE\n"); }
-"ate"             { printf("ATE\n"); }
-"faca"            { printf("FACA\n"); }
-"enquanto"        { printf("ENQUANTO\n"); }
-"escolha"         { printf("ESCOLHA\n"); }
-"caso"            { printf("CASO\n"); }
-"casocontrario"   { printf("CASOCONTRARIO\n"); }
-"se"              { printf("SE\n"); }
-"senao"           { printf("SENAO\n"); }
-"entao"           { printf("ENTAO\n"); }
-"pare"            { printf("PARE\n"); }
+"para"            { printf("PARA\n"); return PARA; }
+"de"              { printf("DE\n"); return DE; }
+"ate"             { printf("ATE\n"); return ATE; }
+"faca"            { printf("FACA\n"); return FACA; }
+"enquanto"        { printf("ENQUANTO\n"); return ENQUANTO; }
+"escolha"         { printf("ESCOLHA\n"); return ESCOLHA; }
+"caso"            { printf("CASO\n"); return CASO; }
+"casocontrario"   { printf("CASOCONTRARIO\n"); return CASOCONTRARIO; }
+"se"              { printf("SE\n"); return SE; }
+"senao"           { printf("SENAO\n"); return SENAO; }
+"entao"           { printf("ENTAO\n"); return ENTAO; }
+"pare"            { printf("PARE\n"); return PARE; }
 
 
-"inteiro"    { printf("INTEIRO\n"); }
-"real"       { printf("REAL\n"); }
-"string"     { printf("STRING\n"); }
-"caractere"  { printf("CARACTERE\n"); }
-"booleano"   { printf("BOOLEANO\n"); }
-"byte"       { printf("BYTE\n"); }
-"registro"   { printf("REGISTRO\n"); }
+"inteiro"    { printf("INTEIRO\n"); return INTEIRO; }
+"real"       { printf("REAL\n"); return REAL; }
+"string"     { printf("STRING\n"); return STRING; }
+"caractere"  { printf("CARACTERE\n"); return CARACTERE; }
+"booleano"   { printf("BOOLEANO\n"); return BOOLEANO; }
+"byte"       { printf("BYTE\n"); return BYTE; }
+"registro"   { printf("REGISTRO\n"); return REGISTRO; }
 
 
-":"        { printf("DOIS_PONTOS\n"); }
-"("        { printf("PAR_ESQ\n"); }
-")"        { printf("PAR_DIR\n"); }
-"{"        { printf("CHAVE_ESQ\n"); }
-"}"        { printf("CHAVE_DIR\n"); }
-"["        { printf("COLCHETE_ESQ\n"); }
-"]"        { printf("COLCHETE_DIR\n"); }
-","        { printf("VIRGULA\n"); }
-";"        { printf("PONTO_E_VIRGULA\n"); }
-"="        { printf("ATRIBUICAO\n"); }
+":"        { printf("DOIS_PONTOS\n"); return DOIS_PONTOS; }
+"("        { printf("PAR_ESQ\n"); return PAR_ESQ; }
+")"        { printf("PAR_DIR\n"); return PAR_DIR; }
+"{"        { printf("CHAVE_ESQ\n"); return CHAVE_ESQ; }
+"}"        { printf("CHAVE_DIR\n"); return CHAVE_DIR; }
+"["        { printf("COLCHETE_ESQ\n"); return COLCHETE_ESQ; }
+"]"        { printf("COLCHETE_DIR\n"); return COLCHETE_DIR; }
+","        { printf("VIRGULA\n"); return VIRGULA; }
+";"        { printf("PONTO_E_VIRGULA\n"); return PONTO_E_VIRGULA; }
+"="        { printf("ATRIBUICAO\n"); return ATRIBUICAO; }
 
 
-"->"       { printf("RETORNA\n"); }
-"+"        { printf("MAIS\n"); }
-"-"        { printf("MENOS\n"); }
-"*"        { printf("ASTERISCO\n"); }
-"/"        { printf("BARRA\n"); }
-"<"        { printf("MENOR\n"); }
-">"        { printf("MAIOR\n"); }
-"<="       { printf("MENOR_IGUAL\n"); }
-">="       { printf("MAIOR_IGUAL\n"); }
-"=="       { printf("IGUAL\n"); }
-"%"        { printf("MOD\n"); }
-"&"        { printf("E_BITS\n"); }
-"|"        { printf("OU_BITS\n"); }
-">>"       { printf("DESLOCAMENTO_DIR\n"); }
-"<<"       { printf("DESLOCAMENTO_ESQ\n"); }
+"->"       { printf("RETORNA\n"); return RETORNA; }
+"+"        { printf("MAIS\n"); return MAIS; }
+"-"        { printf("MENOS\n"); return MENOS; }
+"*"        { printf("ASTERISCO\n"); return ASTERISCO; }
+"/"        { printf("BARRA\n"); return BARRA; }
+"<"        { printf("MENOR\n"); return MENOR; }
+">"        { printf("MAIOR\n"); return MAIOR; }
+"<="       { printf("MENOR_IGUAL\n"); return MENOR_IGUAL; }
+">="       { printf("MAIOR_IGUAL\n"); return MAIOR_IGUAL; }
+"=="       { printf("IGUAL\n"); return IGUAL; }
+"%"        { printf("MOD\n"); return MOD; }
+"&"        { printf("E_BITS\n"); return E_BITS; }
+"|"        { printf("OU_BITS\n"); return OU_BITS; }
+">>"       { printf("DESLOCAMENTO_DIR\n"); return DESLOCAMENTO_DIR; }
+"<<"       { printf("DESLOCAMENTO_ESQ\n"); return DESLOCAMENTO_ESQ; }
 
 
-"e"        { printf("E_LOGICO\n"); }
-"ou"       { printf("OU_LOGICO\n"); }
-"nao"      { printf("NAO_LOGICO\n"); }
+"e"        { printf("E_LOGICO\n"); return E_LOGICO; }
+"ou"       { printf("OU_LOGICO\n"); return OU_LOGICO; }
+"nao"      { printf("NAO_LOGICO\n"); return NAO_LOGICO; }
 
 
-{digitos}                                 { printf("LITERAL_INTEIRO: %d\n", atoi(yytext)); }
-(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { printf("LITERAL_REAL: %f\n", atof(yytext)); }
-("verdadeiro"|"falso")                    { printf("LITERAL_BOOLEANO: %s\n", yytext); }
-\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING: %s\n", yytext); }
-'.'                                       { printf("LITERAL_CARACTERE: %s\n", yytext); }
+{digitos}                                 { printf("LITERAL_INTEIRO: %d\n", atoi(yytext)); return LITERAL_INTEIRO; }
+(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { printf("LITERAL_REAL: %f\n", atof(yytext)); return LITERAL_REAL; }
+("verdadeiro"|"falso")                    { printf("LITERAL_BOOLEANO: %s\n", yytext); return LITERAL_BOOLEANO; }
+\"[a-zA-Z0-9\_]*\"                        { printf("LITERAL_STRING: %s\n", yytext); return LITERAL_STRING; }
+'.'                                       { printf("LITERAL_CARACTERE: %s\n", yytext); return LITERAL_CARACTERE; }
 
-[a-zA-Z][a-zA-Z0-9\_]* { printf("ID: %s\n", yytext); }
+[a-zA-Z][a-zA-Z0-9\_]* { printf("ID: %s\n", yytext); return ID; }
 
 "/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios multi linhas */ }
 [ \n\t\r]+                      { /* Nao faz nada para espacos em branco */ }
