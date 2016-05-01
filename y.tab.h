@@ -53,25 +53,26 @@ extern YYSTYPE yylval;
 #define MENOR_IGUAL      49
 #define MAIOR_IGUAL      50
 #define IGUAL            51
-#define MOD              52
-#define E_BITS           53
-#define OU_BITS          54
-#define XOR_BITS         55
-#define DESLOCAMENTO_ESQ 56
-#define DESLOCAMENTO_DIR 57
-#define NAO_BITS         58
+#define DIFERENTE        52
+#define MOD              53
+#define E_BITS           54
+#define OU_BITS          55
+#define XOR_BITS         56
+#define DESLOCAMENTO_ESQ 57
+#define DESLOCAMENTO_DIR 58
+#define NAO_BITS         59
 
-#define E_LOGICO         59
-#define OU_LOGICO        60
-#define NAO_LOGICO       61
+#define E_LOGICO         60
+#define OU_LOGICO        61
+#define NAO_LOGICO       62
 
-#define INCREMENTO       62
-#define DECREMENTO       63
+#define INCREMENTO       63
+#define DECREMENTO       64
 
-#define LITERAL_INTEIRO   64
-#define LITERAL_REAL      65
-#define LITERAL_BOOLEANO  66
-#define LITERAL_STRING    67
-#define LITERAL_CARACTERE 68
+#define LITERAL_INTEIRO   65
+#define LITERAL_REAL      66
+#define LITERAL_BOOLEANO  67
+#define LITERAL_STRING    68
+#define LITERAL_CARACTERE 69
 
-#define ID                69
+#define ID                70

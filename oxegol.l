@@ -72,6 +72,7 @@ digitos [0-9]+
 "<="       { return MENOR_IGUAL; }
 ">="       { return MAIOR_IGUAL; }
 "=="       { return IGUAL; }
+"!="       { return DIFERENTE; }
 "%"        { return MOD; }
 "&"        { return E_BITS; }
 "|"        { return OU_BITS; }
