@@ -22,4 +22,3 @@ rm lex.yy.c
 rm y.output
 rm y.tab.c
 rm y.tab.h
-
