@@ -9,6 +9,8 @@
 %{
     #include "y.tab.h"
     #include "stdio.h"
+
+    extern int yyerror (char *msg);
 %}
 
 /* Definicoes Lex */
@@ -88,12 +90,12 @@ digitos [0-9]+
 
 
 {digitos}                                 { yylval.ival = atoi(yytext); return LITERAL_INTEIRO; }
-(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { yylval.ival = atof(yytext); return LITERAL_REAL; }
+(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { yylval.fval = atof(yytext); return LITERAL_REAL; }
 ("verdadeiro"|"falso")                    { return LITERAL_BOOLEANO; }
-\"[a-zA-Z0-9\_]*\"                        { yylval.sval = yytext; return LITERAL_STRING; }
+\"[a-zA-Z0-9\_]*\"                        { yylval.sval = strdup(yytext); return LITERAL_STRING; }
 '.'                                       { yylval.cval = yytext[0]; return LITERAL_CARACTERE; }
 
-[a-zA-Z][a-zA-Z0-9\_]* { yylval.sval = yytext; return ID; }
+[a-zA-Z][a-zA-Z0-9\_]* { yylval.sval = strdup(yytext); return ID; }
 
 "/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios multi linhas */ }
 [ \n\t\r]+                      { /* Nao faz nada para espacos em branco */ }
@@ -101,3 +103,7 @@ digitos [0-9]+
 .          { printf("Padrao desconhecido: %s\n", yytext); }
 
 %%
+
+#ifndef yywrap
+   int yywrap (void) {return 1;}
+#endif

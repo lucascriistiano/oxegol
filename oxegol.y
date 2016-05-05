@@ -1,7 +1,19 @@
 %{
     #include "stdio.h"
     #include "y.tab.h"
+
+    int yylex();
+    int yyerror(char *s);
+    extern int yylineno;
+    extern char * yytext;
 %}
+
+%union {
+  int    ival;  /* integer value */
+  float  fval;  /* float value */
+  char   cval;  /* char value */
+  char * sval;  /* string value */
+};
 
 %token PRINCIPAL PROCEDIMENTO FUNCAO RETORNE
 %token PARA DE ATE ENQUANTO ESCOLHA CASO CASOCONTRARIO SE SENAO PARE
@@ -14,44 +26,63 @@
 %token LITERAL_INTEIRO LITERAL_REAL LITERAL_BOOLEANO LITERAL_STRING LITERAL_CARACTERE
 %token ID
 
+%left MAIS MENOS
+%left ASTERISCO BARRA MOD
+
 %%
 
 programa: declaracoes_var_opc declaracoes_opc principal
         ;
 
 declaracoes_var_opc: /* vazio */
-                   | declaracao_var declaracoes_var_opc
+                   | declaracoes_var
                    ;
 
-declaracoes_opc: /* vazio */
-               | declaracao declaracoes_opc
+declaracoes_var: declaracao_var
+               | declaracoes_var declaracao_var
                ;
-
-principal: PRINCIPAL CHAVE_ESQ comandos_opc CHAVE_DIR
-         ;
 
 declaracao_var: tipo ID var_compl
               ;
 
 var_compl: /* vazio */
-         | ATRIBUICAO expressao
+         | atribuicao
          | array_um_mais
          ;
 
-array: COLCHETE_ESQ expressao COLCHETE_DIR
-     ;
+atribuicao: ATRIBUICAO expressao
+          ;
 
 array_um_mais: array
-             | array array_um_mais
+             | array_um_mais array
              ;
+
+array: COLCHETE_ESQ array_tamanho COLCHETE_DIR
+     ;
+
+array_tamanho: ID
+             | LITERAL_INTEIRO
+             ;
+
+declaracoes_opc: /* vazio */
+               | declaracoes
+               ;
+
+declaracoes: declaracao
+           | declaracoes declaracao
+           ;
 
 declaracao: declaracao_registro
           | declaracao_func
           | declaracao_proc
           ;
 
-declaracao_registro: REGISTRO ID CHAVE_ESQ campo_um_mais CHAVE_DIR
-                   ;
+principal: PRINCIPAL CHAVE_ESQ comandos_opc CHAVE_DIR
+         ;
+
+comandos_opc: /* vazio */
+            | comando PONTO_E_VIRGULA comandos_opc
+            ;
 
 declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo CHAVE_ESQ comandos_opc CHAVE_DIR
                ;
@@ -59,12 +90,22 @@ declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo CHAVE_ESQ
 declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
                ;
 
+declaracao_registro: REGISTRO ID CHAVE_ESQ campo_um_mais CHAVE_DIR
+                   ;
+
+campo_um_mais: campo
+             | campo_um_mais campo
+             ;
+
+campo: tipo ID PONTO_E_VIRGULA
+     ;
+
 parametros_opc: /* vazio */
               | parametros
               ;
 
 parametros: parametro
-          | VIRGULA parametro parametros
+          | parametro VIRGULA parametros
           ;
 
 parametro: ref_opc tipo ID
@@ -73,10 +114,6 @@ parametro: ref_opc tipo ID
 ref_opc: /* vazio */
        | REFERENCIA
        ;
-
-argumentos: expressao
-          | VIRGULA expressao argumentos
-          ;
 
 tipo: INTEIRO
     | REAL
@@ -87,9 +124,12 @@ tipo: INTEIRO
     | ID
     ;
 
-comandos_opc: /* vazio */
-            | comando PONTO_E_VIRGULA comandos_opc
-            ;
+literal: LITERAL_INTEIRO    { printf("Literal inteiro: %d", yyval.ival); }
+       | LITERAL_REAL
+       | LITERAL_BOOLEANO
+       | LITERAL_STRING
+       | LITERAL_CARACTERE
+       ;
 
 comando: se
        | para
@@ -116,7 +156,7 @@ senao_se: SENAO se
 para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
     ;
 
-escolha: ESCOLHA PAR_ESQ expressao PAR_DIR CHAVE_ESQ caso_um_mais caso_contrario_opc CHAVE_DIR
+escolha: ESCOLHA PAR_ESQ ID PAR_DIR CHAVE_ESQ caso_um_mais caso_contrario CHAVE_DIR
        ;
 
 caso_um_mais: caso caso_opc
@@ -126,11 +166,8 @@ caso: CASO literal DOIS_PONTOS comandos_opc
     ;
 
 caso_opc: /* vazio */
-        | caso caso_opc;
-
-caso_contrario_opc: /* vazio */
-                  | caso_contrario
-                  ;
+        | caso_opc caso
+        ;
 
 caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc
               ;
@@ -141,59 +178,75 @@ enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
 retorne: RETORNE expressao_opc
        ;
 
+expressao: terminal_exp operador_binario expressao
+         | operador_unario expressao
+         | PAR_ESQ expressao PAR_DIR
+         | terminal_exp
+         ;
+
 expressao_opc: /* vazio */
              | expressao
              ;
 
-operador_binario: MAIS
-                | MENOS
-                | ASTERISCO
-                | BARRA
-                | MENOR
-                | MAIOR
-                | MENOR_IGUAL
-                | MAIOR_IGUAL
-                | IGUAL
-                | DIFERENTE
-                | MOD
-                | E_LOGICO
-                | OU_LOGICO
-                | E_BITS
-                | OU_BITS
-                | XOR_BITS
-                | DESLOCAMENTO_ESQ
-                | DESLOCAMENTO_DIR
+operador_binario: operador_logico_binario
+                | operador_aritmetico
+                | operador_relacional
                 ;
 
-operador_unario: NAO_LOGICO
-               | NAO_BITS
+operador_logico_binario: E_LOGICO
+                       | OU_LOGICO
+                       | E_BITS
+                       | OU_BITS
+                       | XOR_BITS
+                       ;
+
+operador_aritmetico: MAIS       { printf("+\n"); }
+                   | MENOS
+                   | ASTERISCO
+                   | BARRA
+                   | MOD
+                   | DESLOCAMENTO_ESQ
+                   | DESLOCAMENTO_DIR
+                   ;
+
+operador_relacional: MENOR
+                   | MAIOR
+                   | MENOR_IGUAL
+                   | MAIOR_IGUAL
+                   | IGUAL
+                   | DIFERENTE
+                   ;
+
+operador_unario: operador_logico_unario
                | INCREMENTO
                | DECREMENTO
-               | MENOS
                ;
 
-expressao: chamada_funcao
+operador_logico_unario: NAO_LOGICO
+                      | NAO_BITS
+                      ;
+
+terminal_exp: literal
+            | ID argumentos_chamada
+            ;
+
+argumentos_chamada: /* vazio */
+                  | PAR_ESQ argumentos PAR_DIR
+                  ;
+
+argumentos: argumento
+          | argumento VIRGULA argumentos
+          ;
+
+argumento: ID
          | literal
-         | operador_unario expressao
-         | PAR_ESQ expressao PAR_DIR
-         | expressao operador_binario expressao
          ;
 
-chamada_funcao: ID PAR_ESQ argumentos PAR_DIR
-              ;
-
-literal: LITERAL_INTEIRO
-       | LITERAL_REAL
-       | LITERAL_BOOLEANO
-       | LITERAL_STRING
-       | LITERAL_CARACTERE
-       ;
-
-campo_um_mais: campo
-             | campo campo_um_mais
-             ;
-
-campo: tipo ID
-     ;
-
 %%
+
+int main (void) { return yyparse(); }
+
+int yyerror (char *msg) {
+  fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+  return 0;
+}
