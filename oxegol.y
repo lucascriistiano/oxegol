@@ -1,11 +1,11 @@
 %{
-    #include "stdio.h"
-    #include "y.tab.h"
+  #include "stdio.h"
+  #include "y.tab.h"
 
-    int yylex();
-    int yyerror(char *s);
-    extern int yylineno;
-    extern char * yytext;
+  int yylex();
+  int yyerror(char *s);
+  extern int yylineno;
+  extern char * yytext;
 %}
 
 %union {
@@ -13,13 +13,14 @@
   float  fval;  /* float value */
   char   cval;  /* char value */
   char * sval;  /* string value */
+  int bval;     /* boolean value - verdadeiro: 1; falso: 0; */
 };
 
 %token PRINCIPAL PROCEDIMENTO FUNCAO RETORNE
 %token PARA DE ATE ENQUANTO ESCOLHA CASO CASOCONTRARIO SE SENAO PARE
 %token INTEIRO REAL STRING CARACTERE BOOLEANO BYTE REGISTRO
-%token REFERENCIA
-%token DOIS_PONTOS PAR_ESQ PAR_DIR CHAVE_ESQ CHAVE_DIR COLCHETE_ESQ COLCHETE_DIR VIRGULA PONTO_E_VIRGULA ATRIBUICAO
+%token REFERENCIA ACESSO_REGISTRO
+%token PONTO DOIS_PONTOS PAR_ESQ PAR_DIR CHAVE_ESQ CHAVE_DIR COLCHETE_ESQ COLCHETE_DIR VIRGULA PONTO_E_VIRGULA ATRIBUICAO
 %token RETORNA MAIS MENOS ASTERISCO BARRA MENOR MAIOR MENOR_IGUAL MAIOR_IGUAL IGUAL DIFERENTE MOD E_BITS OU_BITS XOR_BITS DESLOCAMENTO_ESQ DESLOCAMENTO_DIR NAO_BITS
 %token E_LOGICO OU_LOGICO NAO_LOGICO
 %token INCREMENTO DECREMENTO
@@ -31,40 +32,45 @@
 
 %%
 
-programa: declaracoes_var_opc declaracoes_opc principal
+programa: secao_declaracoes_var secao_declaracoes_adicionais principal
         ;
 
-declaracoes_var_opc: /* vazio */
-                   | declaracoes_var
-                   ;
+secao_declaracoes_var: /* vazio */
+                     | declaracoes_var
+                     ;
 
-declaracoes_var: declaracao_var
-               | declaracoes_var declaracao_var
+declaracoes_var: declaracao_var PONTO_E_VIRGULA
+               | declaracoes_var declaracao_var PONTO_E_VIRGULA
                ;
 
-declaracao_var: tipo ID var_compl
+declaracao_var: tipo indices_array_opc var_declaradas
               ;
 
-var_compl: /* vazio */
-         | atribuicao
-         | array_um_mais
-         ;
+var_declaradas: ID inicializacao_opc
+              | var_declaradas VIRGULA ID inicializacao_opc
+
+inicializacao_opc: /* vazio */
+                 | atribuicao
+                 ;
 
 atribuicao: ATRIBUICAO expressao
           ;
 
-array_um_mais: array
-             | array_um_mais array
+indices_array_opc: /* vazio */
+                 | indices_array
+                 ;
+
+indices_array: array
+             | indices_array array
              ;
 
-array: COLCHETE_ESQ array_tamanho COLCHETE_DIR
+array: COLCHETE_ESQ array_tamanho_indice COLCHETE_DIR
      ;
 
-array_tamanho: ID
-             | LITERAL_INTEIRO
-             ;
+array_tamanho_indice: expressao
+                    ;
 
-declaracoes_opc: /* vazio */
+secao_declaracoes_adicionais: /* vazio */
                | declaracoes
                ;
 
@@ -81,8 +87,28 @@ principal: PRINCIPAL CHAVE_ESQ comandos_opc CHAVE_DIR
          ;
 
 comandos_opc: /* vazio */
-            | comando PONTO_E_VIRGULA comandos_opc
+            | comando comandos_opc
             ;
+
+comando: se
+       | para
+       | escolha
+       | enquanto
+       | instrucao PONTO_E_VIRGULA
+       ;
+
+instrucao: retorne
+         | PARE
+         | declaracao_var
+         | ID indices_array_opc atribuicao
+         | ID INCREMENTO
+         | ID DECREMENTO
+         | ID argumentos_chamada
+         | ID campos_registro atribuicao
+         ;
+
+campos_registro: PONTO ID
+               | campos_registro PONTO ID
 
 declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo CHAVE_ESQ comandos_opc CHAVE_DIR
                ;
@@ -97,7 +123,7 @@ campo_um_mais: campo
              | campo_um_mais campo
              ;
 
-campo: tipo ID PONTO_E_VIRGULA
+campo: tipo indices_array_opc ID PONTO_E_VIRGULA
      ;
 
 parametros_opc: /* vazio */
@@ -121,22 +147,14 @@ tipo: INTEIRO
     | CARACTERE
     | BOOLEANO
     | BYTE
-    | ID
+    | ACESSO_REGISTRO ID
     ;
 
-literal: LITERAL_INTEIRO    { printf("Literal inteiro: %d", yyval.ival); }
-       | LITERAL_REAL
-       | LITERAL_BOOLEANO
-       | LITERAL_STRING
-       | LITERAL_CARACTERE
-       ;
-
-comando: se
-       | para
-       | escolha
-       | enquanto
-       | retorne
-       | PARE
+literal: LITERAL_INTEIRO     { printf("Literal inteiro: %d\n", yyval.ival); }
+       | LITERAL_REAL        { printf("Literal real: %f\n", yyval.fval); }
+       | LITERAL_BOOLEANO    { printf("Literal booleano: %d\n", yyval.bval); }
+       | LITERAL_STRING      { printf("Literal string: %s\n", yyval.sval); }
+       | LITERAL_CARACTERE   { printf("Literal caractere: %c\n", yyval.cval); }
        ;
 
 se: SE PAR_ESQ expressao PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR senao_opc
@@ -200,7 +218,7 @@ operador_logico_binario: E_LOGICO
                        | XOR_BITS
                        ;
 
-operador_aritmetico: MAIS       { printf("+\n"); }
+operador_aritmetico: MAIS
                    | MENOS
                    | ASTERISCO
                    | BARRA
@@ -227,20 +245,18 @@ operador_logico_unario: NAO_LOGICO
                       ;
 
 terminal_exp: literal
+            | ID
             | ID argumentos_chamada
+            | ID indices_array
+            | ID campos_registro
             ;
 
-argumentos_chamada: /* vazio */
-                  | PAR_ESQ argumentos PAR_DIR
+argumentos_chamada: PAR_ESQ argumentos PAR_DIR
                   ;
 
-argumentos: argumento
-          | argumento VIRGULA argumentos
+argumentos: expressao
+          | expressao VIRGULA argumentos
           ;
-
-argumento: ID
-         | literal
-         ;
 
 %%
 

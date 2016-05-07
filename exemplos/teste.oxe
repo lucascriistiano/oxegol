@@ -1,0 +1,33 @@
+inteiro a = 2;
+inteiro[10][2][23] array;
+
+string hello = "Hello";
+
+booleano v = verdadeiro;
+booleano f = falso;
+
+caractere c = 'a';
+
+real r = 32.4123123123123;
+real r2 = 32.;
+real r3 = .123;
+
+byte b = '1';
+
+inteiro s = 43 + 3;
+
+procedimento teste() {
+
+}
+
+funcao algoritmo() -> inteiro {
+
+}
+
+funcao algoritmo3(ref inteiro a, real b) -> inteiro {
+
+}
+
+principal {
+
+}

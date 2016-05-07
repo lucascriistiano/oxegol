@@ -1,0 +1,20 @@
+registro funcionario {
+    string[30] nome;
+    inteiro idade;
+    caractere sexo;
+    real altura;
+}
+
+principal {
+    reg funcionario f;
+
+    f.nome = "Joao";
+    f.idade = 33;
+    f.sexo = 'M';
+    f.altura = 1.75;
+
+    imprima("Nome " + f.nome);
+    imprima("Idade " + f.idade);
+    imprima("Sexo " + f.sexo);
+    imprima("Altura " + f.altura);
+}

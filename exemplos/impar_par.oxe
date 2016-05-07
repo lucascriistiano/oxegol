@@ -1,0 +1,11 @@
+principal {
+    inteiro num;
+    leia(num);
+
+    booleano retorno;
+    se (num % 2 == 0){
+        imprima("Par");
+    } senao{
+        imprima("Impar");
+    }
+}

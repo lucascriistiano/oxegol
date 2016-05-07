@@ -1,9 +1,10 @@
-procedimento quickSort(inteiro vetor[10], inteiro esquerdo, inteiro direito) {
+procedimento quickSort(ref inteiro vetor, inteiro esquerdo, inteiro direito) {
     inteiro pivo = esquerdo;
     inteiro i, ch, j;
 
     para (i de esquerdo+1 ate direito) {
         j = i;
+
         se (vetor[j] < vetor[pivo]) {
             ch = vetor[j];
             enquanto (j > pivo) {
@@ -22,9 +23,22 @@ procedimento quickSort(inteiro vetor[10], inteiro esquerdo, inteiro direito) {
     se (pivo+1 < direito) {
         quickSort(vetor, pivo+1, direito);
     }
+
+
 }
 
 principal {
-    inteiro vetor[10] = {5,7,8,2,3,1,0,10,20,32};
+    inteiro[10] vetor;
+    vetor[0] = 5;
+    vetor[1] = 7;
+    vetor[2] = 8;
+    vetor[3] = 2;
+    vetor[4] = 3;
+    vetor[5] = 1;
+    vetor[6] = 0;
+    vetor[7] = 10;
+    vetor[8] = 20;
+    vetor[9] = 32;
+
     quickSort(vetor, vetor[0], vetor[9]);
 }

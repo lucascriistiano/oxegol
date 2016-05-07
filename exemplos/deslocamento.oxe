@@ -1,0 +1,18 @@
+principal {
+    string binario;
+    imprima("Escreva um valor binario ");
+    leia(binario);
+
+    inteiro deslocarDir;
+    imprima("Deseja deslocar quantos bits a direita ");
+    leia(deslocarDir);
+    binario = binario >> deslocarDir;    //  desloca os bits a direita. Exemplo: Se binario = 00001110, e o valor de descolamento for 1 (>> 1) retorna 00000111.
+    imprima("Seu valor deslocado para a esquerda ", binario);
+
+    inteiro deslocarEsq;
+    imprima("Deseja deslocar quantos bits a esquerda ");
+    leia(deslocarEsq);
+    binario = binario << deslocarEsq;    //  desloca os bits a esquerda. Exemplo: Se binario = 00000111, e o valor de descolamento for 1 (<< 1), retorna 00001110.
+    imprima("Seu valor deslocado para a esqueda ", binario);
+
+}
