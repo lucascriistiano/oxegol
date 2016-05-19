@@ -45,6 +45,9 @@ digitos [0-9]+
 "byte"       { return BYTE; }
 "registro"   { return REGISTRO; }
 
+"leia"       { return LEIA; }
+"imprima"    { return IMPRIMA; }
+
 
 "ref"        { return REFERENCIA; }
 "reg"        { return ACESSO_REGISTRO; }

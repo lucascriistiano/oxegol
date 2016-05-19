@@ -24,6 +24,9 @@ echo '===== Funcionario ====='
 echo '===== Deslocamento ====='
 ./programa.oxe < exemplos/deslocamento.oxe
 
+# Compilação do Hash
+# gcc -o test testeHash.c hash.c -lm
+
 # Limpeza de arquivos criados
 rm lex.yy.c
 rm y.output

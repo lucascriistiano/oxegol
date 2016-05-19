@@ -24,8 +24,8 @@ principal {
     resposta = ePrimo(x);
 
     se (resposta == verdadeiro) {
-        imprime("O numero eh primo");
+        imprima("O numero eh primo");
     } senao se(resposta == falso) {
-        imprime("O numero nao eh primo");
+        imprima("O numero nao eh primo");
     }
 }

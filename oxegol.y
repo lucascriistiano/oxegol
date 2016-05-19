@@ -19,6 +19,7 @@
 %token PRINCIPAL PROCEDIMENTO FUNCAO RETORNE
 %token PARA DE ATE ENQUANTO ESCOLHA CASO CASOCONTRARIO SE SENAO PARE
 %token INTEIRO REAL STRING CARACTERE BOOLEANO BYTE REGISTRO
+%token LEIA IMPRIMA
 %token REFERENCIA ACESSO_REGISTRO
 %token PONTO DOIS_PONTOS PAR_ESQ PAR_DIR CHAVE_ESQ CHAVE_DIR COLCHETE_ESQ COLCHETE_DIR VIRGULA PONTO_E_VIRGULA ATRIBUICAO
 %token RETORNA MAIS MENOS ASTERISCO BARRA MENOR MAIOR MENOR_IGUAL MAIOR_IGUAL IGUAL DIFERENTE MOD E_BITS OU_BITS XOR_BITS DESLOCAMENTO_ESQ DESLOCAMENTO_DIR NAO_BITS
@@ -105,6 +106,8 @@ instrucao: retorne
          | ID DECREMENTO
          | ID argumentos_chamada
          | ID campos_registro atribuicao
+         | IMPRIMA argumentos_chamada
+         | LEIA PAR_ESQ ID PAR_DIR
          ;
 
 campos_registro: PONTO ID
@@ -196,10 +199,10 @@ enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR CHAVE_ESQ comandos_opc CHAVE_DIR
 retorne: RETORNE expressao_opc
        ;
 
-expressao: terminal_exp operador_binario expressao
+expressao: terminal_exp_cast_opc operador_binario expressao
          | operador_unario expressao
          | PAR_ESQ expressao PAR_DIR
-         | terminal_exp
+         | terminal_exp_cast_opc
          ;
 
 expressao_opc: /* vazio */
@@ -243,6 +246,10 @@ operador_unario: operador_logico_unario
 operador_logico_unario: NAO_LOGICO
                       | NAO_BITS
                       ;
+
+terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp
+                     | terminal_exp
+                     ;
 
 terminal_exp: literal
             | ID
