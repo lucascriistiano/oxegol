@@ -1,5 +1,5 @@
 /*
-  Código tirado do github : 
+  Código adaptado do github : https://gist.github.com/tonious/1377667
  */
  #define _XOPEN_SOURCE 500 /* Enable certain library functions (strdup) on linux.  See feature_test_macros(7) */
 
@@ -9,134 +9,127 @@
 #include <limits.h>
 #include <string.h>
 
+/* Cria uma nova tabela hash. */
+tabela_hash *criar_hash(int tamanho) {
 
-//alterar essa estrutura colocando o que falta
+    tabela_hash *tabela = NULL;
+    int i;
 
-/* Create a new hashtable. */
-hashtable_t *ht_create( int size ) {
+    if(tamanho < 1) return NULL;
 
-	hashtable_t *hashtable = NULL;
-	int i;
+    /* Aloca a tabela. */
+    if((tabela = malloc(sizeof(tabela))) == NULL) {
+        return NULL;
+    }
 
-	if( size < 1 ) return NULL;
+    /* Aloca os ponteiros para os nós cabeça. */
+    if((tabela->tabela = malloc(sizeof(variavel *) * tamanho)) == NULL ) {
+        return NULL;
+    }
+    for(i = 0; i < tamanho; i++) {
+        tabela->tabela[i] = NULL;
+    }
 
-	/* Allocate the table itself. */
-	if( ( hashtable = malloc( sizeof( hashtable_t ) ) ) == NULL ) {
-		return NULL;
-	}
+    tabela->tamanho = tamanho;
 
-	/* Allocate pointers to the head nodes. */
-	if( ( hashtable->table = malloc( sizeof( entry_t * ) * size ) ) == NULL ) {
-		return NULL;
-	}
-	for( i = 0; i < size; i++ ) {
-		hashtable->table[i] = NULL;
-	}
-
-	hashtable->size = size;
-
-	return hashtable;	
+    return tabela;
 }
 
-/* Hash a string for a particular hash table. */
-int ht_hash( hashtable_t *hashtable, char *key ) {
+/* Transforma a string chave em uma posição na tabela. */
+int funcao_hash(tabela_hash *tabela, char *chave) {
 
-	unsigned long int hashval;
-	int i = 0;
+    unsigned long int valor_hash;
+    int i = 0;
 
-	/* Convert our string to an integer */
-	while( hashval < ULONG_MAX && i < strlen( key ) ) {
-		hashval = hashval << 8;
-		hashval += key[ i ];
-		i++;
-	}
+    /* Converte nossa string para um inteiro */
+    while(valor_hash < ULONG_MAX && i < strlen(chave)) {
+        valor_hash = valor_hash << 8;
+        valor_hash += chave[i];
+        i++;
+    }
 
-	return hashval % hashtable->size;
+    return valor_hash % tabela->tamanho;
 }
 
-/* Create a key-value pair. */
-entry_t *ht_newpair( char *key, char *value ) {
-	entry_t *newpair;
+/* Cria o registro na tabela. */
+variavel *nova_variavel(char *chave, tipo t, int tamanho) {
+    variavel *nova_variavel;
 
-	if( ( newpair = malloc( sizeof( entry_t ) ) ) == NULL ) {
-		return NULL;
-	}
+    if((nova_variavel = malloc(sizeof(variavel))) == NULL) {
+        return NULL;
+    }
 
-	if( ( newpair->key = strdup( key ) ) == NULL ) {
-		return NULL;
-	}
+    if((nova_variavel->chave = strdup(chave)) == NULL) {
+        return NULL;
+    }
 
-	if( ( newpair->value = strdup( value ) ) == NULL ) {
-		return NULL;
-	}
+    nova_variavel->t = t;
+    nova_variavel->tamanho = tamanho;
+    nova_variavel->proximo = NULL;
 
-	newpair->next = NULL;
-
-	return newpair;
+    return nova_variavel;
 }
 
-/* Insert a key-value pair into a hash table. */
-void ht_set( hashtable_t *hashtable, char *key, char *value ) {
-	int bin = 0;
-	entry_t *newpair = NULL;
-	entry_t *next = NULL;
-	entry_t *last = NULL;
+/* Insere um par chave-valor na tabela hash.*/
+void atualiza_variavel(tabela_hash *tabela, char *chave, tipo t, int tamanho) {
+    int indice = 0;
+    variavel *variavel_nova = NULL;
+    variavel *proximo = NULL;
+    variavel *ultimo = NULL;
 
-	bin = ht_hash( hashtable, key );
+    indice = funcao_hash(tabela, chave);
 
-	next = hashtable->table[ bin ];
+    proximo = tabela->tabela[indice];
 
-	while( next != NULL && next->key != NULL && strcmp( key, next->key ) > 0 ) {
-		last = next;
-		next = next->next;
-	}
+    while(proximo != NULL && proximo->chave != NULL && strcmp(chave, proximo->chave ) > 0) {
+        ultimo = proximo;
+        proximo = proximo->proximo;
+    }
 
-	/* There's already a pair.  Let's replace that string. */
-	if( next != NULL && next->key != NULL && strcmp( key, next->key ) == 0 ) {
+    /* Já existe uma variavel.  Substitui o seu conteúdo. */
+    if(proximo != NULL && proximo->chave != NULL && strcmp(chave, proximo->chave) == 0) {
+        proximo->t = t;
+        proximo->tamanho = tamanho;
 
-		free( next->value );
-		next->value = strdup( value );
+    /* Nenhum par encontrado. Cria uma nova variável. */
+    } else {
+        variavel_nova = nova_variavel(chave, t, tamanho);
 
-	/* Nope, could't find it.  Time to grow a pair. */
-	} else {
-		newpair = ht_newpair( key, value );
+        /* Essa posição está no começo da lista ligada. */
+        if(proximo == tabela->tabela[indice]) {
+            variavel_nova->proximo = proximo;
+            tabela->tabela[indice] = variavel_nova;
 
-		/* We're at the start of the linked list in this bin. */
-		if( next == hashtable->table[ bin ] ) {
-			newpair->next = next;
-			hashtable->table[ bin ] = newpair;
-	
-		/* We're at the end of the linked list in this bin. */
-		} else if ( next == NULL ) {
-			last->next = newpair;
-	
-		/* We're in the middle of the list. */
-		} else  {
-			newpair->next = next;
-			last->next = newpair;
-		}
-	}
+        /* Essa posição está no final da lista ligada. */
+        } else if ( proximo == NULL ) {
+            ultimo->proximo = variavel_nova;
+
+        /* Essa posição está no meio da lista ligada. */
+        } else  {
+            variavel_nova->proximo = proximo;
+            ultimo->proximo = variavel_nova;
+        }
+    }
 }
 
-/* Retrieve a key-value pair from a hash table. */
-char *ht_get( hashtable_t *hashtable, char *key ) {
-	int bin = 0;
-	entry_t *pair;
+/* Busca uma variavel a partir da tabela hash. */
+variavel *busca_variavel(tabela_hash *tabela, char *chave) {
+    int indice = 0;
+    variavel *variavel_encontrada;
 
-	bin = ht_hash( hashtable, key );
+    indice = funcao_hash(tabela, chave);
 
-	/* Step through the bin, looking for our value. */
-	pair = hashtable->table[ bin ];
-	while( pair != NULL && pair->key != NULL && strcmp( key, pair->key ) > 0 ) {
-		pair = pair->next;
-	}
+    /* Step through the bin, looking for our value. */
+    variavel_encontrada = tabela->tabela[indice];
+    while(variavel_encontrada != NULL && variavel_encontrada->chave != NULL && strcmp(chave, variavel_encontrada->chave) > 0) {
+        variavel_encontrada = variavel_encontrada->proximo;
+    }
 
-	/* Did we actually find anything? */
-	if( pair == NULL || pair->key == NULL || strcmp( key, pair->key ) != 0 ) {
-		return NULL;
+    /* Did we actually find anything? */
+    if(variavel_encontrada == NULL || variavel_encontrada->chave == NULL || strcmp(chave, variavel_encontrada->chave) != 0) {
+        return NULL;
+    } else {
+        return variavel_encontrada;
+    }
 
-	} else {
-		return pair->value;
-	}
-	
 }

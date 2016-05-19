@@ -6,17 +6,24 @@
 
 int main( int argc, char **argv ) {
 
-	hashtable_t *hashtable = ht_create( 65536 );
+    tabela_hash *tabela_hash = criar_hash( 65536 );
 
-	ht_set( hashtable, "key1", "inky" );
-	ht_set( hashtable, "key2", "pinky" );
-	ht_set( hashtable, "key3", "blinky" );
-	ht_set( hashtable, "key4", "floyd" );
+    atualiza_variavel( tabela_hash, "key1", 0 , 1);
+    atualiza_variavel( tabela_hash, "key2", 1 , 1);
+    atualiza_variavel( tabela_hash, "key3", 2 , 1);
+    atualiza_variavel( tabela_hash, "key4", 1 , 1);
 
-	printf( "%s\n", ht_get( hashtable, "key1" ) );
-	printf( "%s\n", ht_get( hashtable, "key2" ) );
-	printf( "%s\n", ht_get( hashtable, "key3" ) );
-	printf( "%s\n", ht_get( hashtable, "key4" ) );
+    variavel *v1 = busca_variavel(tabela_hash, "key1");
+    printf( "%s %d %d\n", v1->chave, v1->t, v1->tamanho );
 
-	return 0;
+    variavel *v2 = busca_variavel(tabela_hash, "key2");
+    printf( "%s %d %d\n", v2->chave, v2->t, v2->tamanho );
+
+    variavel *v3 = busca_variavel(tabela_hash, "key3");
+    printf( "%s %d %d\n", v3->chave, v3->t, v3->tamanho );
+
+    variavel *v4 = busca_variavel(tabela_hash, "key4");
+    printf( "%s %d %d\n", v4->chave, v4->t, v4->tamanho );
+
+    return 0;
 }

@@ -1,25 +1,32 @@
 #ifndef HASH_H
 #define HASH_H
 
-struct entry_s {
-	char *key;
-	char *value;
-	struct entry_s *next;
+enum tipo_e {
+    inteiro, real, booleano, caracter, string
 };
 
-typedef struct entry_s entry_t;
+typedef enum tipo_e tipo;
 
-struct hashtable_s {
-	int size;
-	struct entry_s **table;	
+struct variavel_s {
+    char *chave; //Nome concatenado com o escopo separado pelo $ (e01$identificador)
+    tipo t; //
+    int tamanho;
+    struct variavel_s *proximo;
 };
 
-typedef struct hashtable_s hashtable_t;
+typedef struct variavel_s variavel;
 
-hashtable_t *ht_create( int size );
-int ht_hash( hashtable_t *hashtable, char *key );
-entry_t *ht_newpair( char *key, char *value );
-void ht_set( hashtable_t *hashtable, char *key, char *value );
-char *ht_get( hashtable_t *hashtable, char *key );
+struct tabela_hash_s {
+    int tamanho;
+    struct variavel_s **tabela;
+};
 
-#endif 
+typedef struct tabela_hash_s tabela_hash;
+
+tabela_hash *criar_hash(int tamanho);
+int funcao_hash(tabela_hash *tabela, char *chave);
+variavel *nova_variavel(char *chave, tipo t, int tamanho);
+void atualiza_variavel(tabela_hash *tabela, char *chave, tipo t, int tamanho);
+variavel *busca_variavel(tabela_hash *tabela, char *chave);
+
+#endif
