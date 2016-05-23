@@ -1,0 +1,10 @@
+OK - Criar uma variável escopo no YACC
+OK - Criar uma lista encadeada de tabelas hash
+OK - Para cada { incrementar a variável escopo e criar uma nova entrada na lista de tabelas
+OK - Para cada } decrementar a variável escopo e remover uma entrada da lista de tabelas
+- Para cada declaração, escrever na tabela a variável
+- Na tabela hash, buscar variável e se já existir reclamar (não substituir, como está atualmente)
+- Para cada operação, verificar os tipos
+
+- Repetir os passos acima para as declarações de funções e procedimentos
+- FOpen e FClose no YACC

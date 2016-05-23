@@ -23,6 +23,7 @@ digitos [0-9]+
 "procedimento"    { return PROCEDIMENTO; }
 "funcao"          { return FUNCAO; }
 "retorne"         { return RETORNE; }
+"global"          { return GLOBAL; }
 
 
 "para"            { return PARA; }

@@ -3,40 +3,40 @@
  */
  #define _XOPEN_SOURCE 500 /* Enable certain library functions (strdup) on linux.  See feature_test_macros(7) */
 
-#include "hash.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
+#include "hash.h"
 
 /* Cria uma nova tabela hash. */
-tabela_hash *criar_hash(int tamanho) {
+tabela_hash_t *criar_hash(int tamanho) {
 
-    tabela_hash *tabela = NULL;
+    tabela_hash_t *tabela_hash = NULL;
     int i;
 
     if(tamanho < 1) return NULL;
 
     /* Aloca a tabela. */
-    if((tabela = malloc(sizeof(tabela))) == NULL) {
+    if((tabela_hash = malloc(sizeof(tabela_hash))) == NULL) {
         return NULL;
     }
 
     /* Aloca os ponteiros para os nós cabeça. */
-    if((tabela->tabela = malloc(sizeof(variavel *) * tamanho)) == NULL ) {
+    if((tabela_hash->tabela = malloc(sizeof(variavel_t *) * tamanho)) == NULL ) {
         return NULL;
     }
     for(i = 0; i < tamanho; i++) {
-        tabela->tabela[i] = NULL;
+        tabela_hash->tabela[i] = NULL;
     }
 
-    tabela->tamanho = tamanho;
+    tabela_hash->tamanho = tamanho;
 
-    return tabela;
+    return tabela_hash;
 }
 
 /* Transforma a string chave em uma posição na tabela. */
-int funcao_hash(tabela_hash *tabela, char *chave) {
+int funcao_hash(tabela_hash_t *tabela_hash, char *chave) {
 
     unsigned long int valor_hash;
     int i = 0;
@@ -48,14 +48,14 @@ int funcao_hash(tabela_hash *tabela, char *chave) {
         i++;
     }
 
-    return valor_hash % tabela->tamanho;
+    return valor_hash % tabela_hash->tamanho;
 }
 
 /* Cria o registro na tabela. */
-variavel *nova_variavel(char *chave, tipo t, int tamanho) {
-    variavel *nova_variavel;
+variavel_t *nova_variavel(char *chave, tipo t, int tamanho) {
+    variavel_t *nova_variavel;
 
-    if((nova_variavel = malloc(sizeof(variavel))) == NULL) {
+    if((nova_variavel = malloc(sizeof(variavel_t))) == NULL) {
         return NULL;
     }
 
@@ -71,15 +71,15 @@ variavel *nova_variavel(char *chave, tipo t, int tamanho) {
 }
 
 /* Insere um par chave-valor na tabela hash.*/
-void atualiza_variavel(tabela_hash *tabela, char *chave, tipo t, int tamanho) {
+void atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo t, int tamanho) {
     int indice = 0;
-    variavel *variavel_nova = NULL;
-    variavel *proximo = NULL;
-    variavel *ultimo = NULL;
+    variavel_t *variavel_nova = NULL;
+    variavel_t *proximo = NULL;
+    variavel_t *ultimo = NULL;
 
-    indice = funcao_hash(tabela, chave);
+    indice = funcao_hash(tabela_hash, chave);
 
-    proximo = tabela->tabela[indice];
+    proximo = tabela_hash->tabela[indice];
 
     while(proximo != NULL && proximo->chave != NULL && strcmp(chave, proximo->chave ) > 0) {
         ultimo = proximo;
@@ -96,9 +96,9 @@ void atualiza_variavel(tabela_hash *tabela, char *chave, tipo t, int tamanho) {
         variavel_nova = nova_variavel(chave, t, tamanho);
 
         /* Essa posição está no começo da lista ligada. */
-        if(proximo == tabela->tabela[indice]) {
+        if(proximo == tabela_hash->tabela[indice]) {
             variavel_nova->proximo = proximo;
-            tabela->tabela[indice] = variavel_nova;
+            tabela_hash->tabela[indice] = variavel_nova;
 
         /* Essa posição está no final da lista ligada. */
         } else if ( proximo == NULL ) {
@@ -113,14 +113,14 @@ void atualiza_variavel(tabela_hash *tabela, char *chave, tipo t, int tamanho) {
 }
 
 /* Busca uma variavel a partir da tabela hash. */
-variavel *busca_variavel(tabela_hash *tabela, char *chave) {
+variavel_t *busca_variavel(tabela_hash_t *tabela_hash, char *chave) {
     int indice = 0;
-    variavel *variavel_encontrada;
+    variavel_t *variavel_encontrada;
 
-    indice = funcao_hash(tabela, chave);
+    indice = funcao_hash(tabela_hash, chave);
 
     /* Step through the bin, looking for our value. */
-    variavel_encontrada = tabela->tabela[indice];
+    variavel_encontrada = tabela_hash->tabela[indice];
     while(variavel_encontrada != NULL && variavel_encontrada->chave != NULL && strcmp(chave, variavel_encontrada->chave) > 0) {
         variavel_encontrada = variavel_encontrada->proximo;
     }
