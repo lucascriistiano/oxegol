@@ -6,7 +6,7 @@ principal {
     leia(a);
     leia(b);
 
-    leia(op);
+    leia(a);
     escolha(op) {
         caso 1:
             somar(a, b);

@@ -3,7 +3,7 @@
 # Compilacao e execucao
 flex oxegol.l
 yacc -d -v oxegol.y
-cc lex.yy.c y.tab.c -o programa.oxe
+cc lex.yy.c y.tab.c hash.c escopo.c -o programa.oxe
 
 # Executar exemplos
 echo '===== Quicksort ====='
@@ -23,6 +23,9 @@ echo '===== Funcionario ====='
 
 echo '===== Deslocamento ====='
 ./programa.oxe < exemplos/deslocamento.oxe
+
+# Compilação do Hash
+# gcc -o test testeHash.c hash.c -lm
 
 # Limpeza de arquivos criados
 rm lex.yy.c

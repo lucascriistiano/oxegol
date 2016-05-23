@@ -23,6 +23,7 @@ digitos [0-9]+
 "procedimento"    { return PROCEDIMENTO; }
 "funcao"          { return FUNCAO; }
 "retorne"         { return RETORNE; }
+"global"          { return GLOBAL; }
 
 
 "para"            { return PARA; }
@@ -44,6 +45,9 @@ digitos [0-9]+
 "booleano"   { return BOOLEANO; }
 "byte"       { return BYTE; }
 "registro"   { return REGISTRO; }
+
+"leia"       { return LEIA; }
+"imprima"    { return IMPRIMA; }
 
 
 "ref"        { return REFERENCIA; }
