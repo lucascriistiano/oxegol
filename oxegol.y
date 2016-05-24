@@ -9,6 +9,7 @@
   int yyerror(char *s);
   extern int yylineno;
   extern char * yytext;
+  extern FILE * yyin;
   
   escopo_t *escopo_atual;
   
@@ -78,10 +79,16 @@ array: COLCHETE_ESQ array_tamanho_indice COLCHETE_DIR
 array_tamanho_indice: expressao
                     ;
 
-abertura_bloco: CHAVE_ESQ   { numero_escopo_atual++; printf("entrando no escopo: %d\n", numero_escopo_atual); escopo_atual = cria_escopo(escopo_atual); }
+abertura_bloco: CHAVE_ESQ   { numero_escopo_atual++;
+                              printf("entrando no escopo: %d\n", numero_escopo_atual);
+                              escopo_atual = cria_escopo(escopo_atual);
+                            }
               ;
               
-fechamento_bloco: CHAVE_DIR { escopo_atual = apaga_escopo(escopo_atual); printf("saindo do escopo: %d\n", numero_escopo_atual); numero_escopo_atual--; }
+fechamento_bloco: CHAVE_DIR { escopo_atual = apaga_escopo(escopo_atual);
+                              printf("saindo do escopo: %d\n", numero_escopo_atual);
+                              numero_escopo_atual--;
+                            }
                 ;
               
               
@@ -281,15 +288,24 @@ argumentos: expressao
 
 %%
 
-int main (void) { 
-    escopo_atual = cria_escopo(escopo_atual);
-
-    //Fopen
-    //Associa com o YYIN
-    return yyparse();
-    //Fecha o arquivo
+int main (int argc, char *argv[]) { 
+    if (argc != 2) {
+        printf("Usage: %s filename", argv[0]);
+    } else {
+        char *filename = argv[1];
+        FILE *file = fopen(filename,"r+");
+       
+        if(file == NULL) {
+            printf("Unable to open file.\n");
+        } else {
+            escopo_atual = cria_escopo(escopo_atual);
+            yyin = file;
+            yyparse();
+        }
+    
+        fclose(file);
+    }
 }
-
 
 int yyerror (char *msg) {
   fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
