@@ -7,22 +7,22 @@ cc lex.yy.c y.tab.c hash.c escopo.c -o programa.oxe
 
 # Executar exemplos
 echo '===== Quicksort ====='
-./programa.oxe < exemplos/quicksort.oxe
+./programa.oxe exemplos/quicksort.oxe
 
 echo '===== Eh primo ====='
-./programa.oxe < exemplos/eprimo.oxe
+./programa.oxe exemplos/eprimo.oxe
 
 echo '===== Menu ====='
-./programa.oxe < exemplos/menu.oxe
+./programa.oxe exemplos/menu.oxe
 
 echo '===== Impar ou Par ====='
-./programa.oxe < exemplos/impar_par.oxe
+./programa.oxe exemplos/impar_par.oxe
 
 echo '===== Funcionario ====='
-./programa.oxe < exemplos/funcionario.oxe
+./programa.oxe exemplos/funcionario.oxe
 
 echo '===== Deslocamento ====='
-./programa.oxe < exemplos/deslocamento.oxe
+./programa.oxe exemplos/deslocamento.oxe
 
 # Compilação do Hash
 # gcc -o test testeHash.c hash.c -lm
