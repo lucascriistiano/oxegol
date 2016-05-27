@@ -15,7 +15,6 @@ escopo_t *cria_escopo(escopo_t *escopo_atual); //push
 escopo_t *apaga_escopo(escopo_t *escopo_atual); //pop
 variavel_t *consulta_escopos(escopo_t *escopo_atual, char *chave); //get todos escopos
 variavel_t *consulta_escopo_atual(escopo_t *escopo_atual, char *chave); //get escopo atual
-void criar_variavel_escopo_atual(escopo_t *escopo_atual, char *chave, tipo t, int tamanho);
-
+int criar_variavel_escopo_atual(escopo_t *escopo_atual, char *chave, tipo_t tipo, int tamanho);
 
 #endif

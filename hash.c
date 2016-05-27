@@ -52,7 +52,7 @@ int funcao_hash(tabela_hash_t *tabela_hash, char *chave) {
 }
 
 /* Cria o registro na tabela. */
-variavel_t *nova_variavel(char *chave, tipo t, int tamanho) {
+variavel_t *nova_variavel(char *chave, tipo_t tipo, int tamanho) {
     variavel_t *nova_variavel;
 
     if((nova_variavel = malloc(sizeof(variavel_t))) == NULL) {
@@ -63,7 +63,7 @@ variavel_t *nova_variavel(char *chave, tipo t, int tamanho) {
         return NULL;
     }
 
-    nova_variavel->t = t;
+    nova_variavel->tipo = tipo;
     nova_variavel->tamanho = tamanho;
     nova_variavel->proximo = NULL;
 
@@ -71,7 +71,7 @@ variavel_t *nova_variavel(char *chave, tipo t, int tamanho) {
 }
 
 /* Insere um par chave-valor na tabela hash.*/
-void atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo t, int tamanho) {
+int atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo_t tipo, int tamanho) {
     int indice = 0;
     variavel_t *variavel_nova = NULL;
     variavel_t *proximo = NULL;
@@ -86,14 +86,13 @@ void atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo t, int tama
         proximo = proximo->proximo;
     }
 
-    /* Já existe uma variavel.  Substitui o seu conteúdo. */
+    /* Já existe uma variavel. Não substitui o seu conteúdo e retorna erro. */
     if(proximo != NULL && proximo->chave != NULL && strcmp(chave, proximo->chave) == 0) {
-        proximo->t = t;
-        proximo->tamanho = tamanho;
-
+        return 1;
+        
     /* Nenhum par encontrado. Cria uma nova variável. */
     } else {
-        variavel_nova = nova_variavel(chave, t, tamanho);
+        variavel_nova = nova_variavel(chave, tipo, tamanho);
 
         /* Essa posição está no começo da lista ligada. */
         if(proximo == tabela_hash->tabela[indice]) {
@@ -109,6 +108,8 @@ void atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo t, int tama
             variavel_nova->proximo = proximo;
             ultimo->proximo = variavel_nova;
         }
+        
+        return 0;
     }
 }
 

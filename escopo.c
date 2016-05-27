@@ -57,9 +57,11 @@ variavel_t *consulta_escopo_atual(escopo_t *escopo_atual, char *chave) {
     }
 }
 
-void criar_variavel_escopo_atual(escopo_t *escopo_atual, char *chave, tipo t, int tamanho) {
+int criar_variavel_escopo_atual(escopo_t *escopo_atual, char *chave, tipo_t tipo, int tamanho) {
     if (escopo_atual != NULL) {
         tabela_hash_t *tabela_hash_escopo_atual = escopo_atual->tabela_hash;
-        atualiza_variavel(tabela_hash_escopo_atual, chave, t, tamanho);
+        return atualiza_variavel(tabela_hash_escopo_atual, chave, tipo, tamanho);
+    } else {
+        return 1;
     }
 }

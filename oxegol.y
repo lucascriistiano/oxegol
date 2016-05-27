@@ -4,6 +4,7 @@
   #include "y.tab.h"
   #include "hash.h"
   #include "escopo.h"
+  #include "aux.h"
   
   int yylex();
   int yyerror(char *s);
@@ -17,11 +18,11 @@
 %}
 
 %union {
-  int    ival;  /* integer value */
-  float  fval;  /* float value */
-  char   cval;  /* char value */
-  char * sval;  /* string value */
-  int bval;     /* boolean value - verdadeiro: 1; falso: 0; */
+  int   ival;  /* valor inteiro */
+  float fval;  /* valor float */
+  char  cval;  /* valor caractere */
+  char* sval; /* valor string */
+  int   bval;  /* valor booleano - verdadeiro: 1; falso: 0; */
 };
 
 %token PRINCIPAL PROCEDIMENTO FUNCAO RETORNE GLOBAL
@@ -52,17 +53,17 @@ declaracoes_var: declaracao_var PONTO_E_VIRGULA
                | declaracoes_var declaracao_var PONTO_E_VIRGULA
                ;
 
-declaracao_var: tipo indices_array_opc var_declaradas
+declaracao_var: tipo indices_array_opc var_declaradas  { $$ =  }
               ;
 
-var_declaradas: ID inicializacao_opc
-              | var_declaradas VIRGULA ID inicializacao_opc
+var_declaradas: ID inicializacao_opc                         { $$ =  $1; }
+              | var_declaradas VIRGULA ID inicializacao_opc  { }
 
 inicializacao_opc: /* vazio */
                  | atribuicao
                  ;
 
-atribuicao: ATRIBUICAO expressao
+atribuicao: ATRIBUICAO expressao     {  }
           ;
 
 indices_array_opc: /* vazio */
@@ -165,20 +166,20 @@ ref_opc: /* vazio */
        | REFERENCIA
        ;
 
-tipo: INTEIRO
-    | REAL
-    | STRING
-    | CARACTERE
-    | BOOLEANO
-    | BYTE
-    | ACESSO_REGISTRO ID
+tipo: INTEIRO               { $$ = inteiro; }
+    | REAL                  { $$ = real; }
+    | STRING                { $$ = string; }
+    | CARACTERE             { $$ = caractere; }
+    | BOOLEANO              { $$ = booleano; }
+    | BYTE                  { $$ = caractere; }
+    | ACESSO_REGISTRO ID    { $$ = $2; }
     ;
 
-literal: LITERAL_INTEIRO     { printf("Literal inteiro: %d\n", yyval.ival); }
-       | LITERAL_REAL        { printf("Literal real: %f\n", yyval.fval); }
-       | LITERAL_BOOLEANO    { printf("Literal booleano: %d\n", yyval.bval); }
-       | LITERAL_STRING      { printf("Literal string: %s\n", yyval.sval); }
-       | LITERAL_CARACTERE   { printf("Literal caractere: %c\n", yyval.cval); }
+literal: LITERAL_INTEIRO     { $$ = inteiro; }
+       | LITERAL_REAL        { $$ = real; }
+       | LITERAL_BOOLEANO    { $$ = booleano; }
+       | LITERAL_STRING      { $$ = string; }
+       | LITERAL_CARACTERE   { $$ = caractere; }
        ;
 
 se: SE PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco senao_opc
@@ -268,8 +269,8 @@ operador_logico_unario: NAO_LOGICO
                       | NAO_BITS
                       ;
 
-terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp
-                     | terminal_exp
+terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  {  }
+                     | terminal_exp                       {  }
                      ;
 
 terminal_exp: literal
@@ -310,4 +311,10 @@ int main (int argc, char *argv[]) {
 int yyerror (char *msg) {
   fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
   return 0;
+}
+
+no_t* create_literal_node(char* identificador, valor_t valor) {
+    
+    no_t* no = () malloc(sizeof(no_t));
+
 }
