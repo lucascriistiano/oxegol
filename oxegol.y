@@ -1,19 +1,25 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
-  #include "y.tab.h"
+  #include <string.h>
   #include "hash.h"
   #include "escopo.h"
-  #include "aux.h"
-  
+
   int yylex();
   int yyerror(char *s);
   extern int yylineno;
   extern char * yytext;
   extern FILE * yyin;
-  
+
+  typedef struct no_s {
+      variavel_t *variavel;
+      tipo_t tipo;
+      char *codigo;
+  } no_t;
+
+  no_t* create_literal_node(tipo_t tipo, char *valor);
+
   escopo_t *escopo_atual;
-  
   int numero_escopo_atual = 0;
 %}
 
@@ -21,8 +27,10 @@
   int   ival;  /* valor inteiro */
   float fval;  /* valor float */
   char  cval;  /* valor caractere */
-  char* sval; /* valor string */
+  char* sval;  /* valor string */
   int   bval;  /* valor booleano - verdadeiro: 1; falso: 0; */
+
+  tipo_t tipo;
 };
 
 %token PRINCIPAL PROCEDIMENTO FUNCAO RETORNE GLOBAL
@@ -40,6 +48,8 @@
 %left MAIS MENOS
 %left ASTERISCO BARRA MOD
 
+%type<tipo> inicializacao_opc atribuicao tipo expressao var_declaradas literal terminal_exp terminal_exp_cast_opc argumentos ID
+
 %%
 
 programa: secao_declaracoes_var secao_declaracoes_adicionais principal
@@ -53,17 +63,22 @@ declaracoes_var: declaracao_var PONTO_E_VIRGULA
                | declaracoes_var declaracao_var PONTO_E_VIRGULA
                ;
 
-declaracao_var: tipo indices_array_opc var_declaradas  { $$ =  }
+declaracao_var: tipo indices_array_opc var_declaradas  { if($1 != $3) {
+                                                            yyerror("Tipos incompatíveis");
+                                                          } else {
+                                                            printf("Tipos compatíveis\n");
+                                                          }
+                                                        } //Só com uma
               ;
 
-var_declaradas: ID inicializacao_opc                         { $$ =  $1; }
-              | var_declaradas VIRGULA ID inicializacao_opc  { }
+var_declaradas: ID inicializacao_opc                         { $$ = $2; }
+              | var_declaradas VIRGULA ID inicializacao_opc  { $$ = $4; } //Verificar se os tipos das inicializacoes sao iguais
 
-inicializacao_opc: /* vazio */
-                 | atribuicao
+inicializacao_opc: /* vazio */   {  }
+                 | atribuicao    { $$ = $1; }
                  ;
 
-atribuicao: ATRIBUICAO expressao     {  }
+atribuicao: ATRIBUICAO expressao     { $$ = $2; }
           ;
 
 indices_array_opc: /* vazio */
@@ -85,14 +100,14 @@ abertura_bloco: CHAVE_ESQ   { numero_escopo_atual++;
                               escopo_atual = cria_escopo(escopo_atual);
                             }
               ;
-              
+
 fechamento_bloco: CHAVE_DIR { escopo_atual = apaga_escopo(escopo_atual);
                               printf("saindo do escopo: %d\n", numero_escopo_atual);
                               numero_escopo_atual--;
                             }
                 ;
-              
-              
+
+
 secao_declaracoes_adicionais: /* vazio */
                             | declaracoes
                             ;
@@ -175,6 +190,13 @@ tipo: INTEIRO               { $$ = inteiro; }
     | ACESSO_REGISTRO ID    { $$ = $2; }
     ;
 
+// literal: LITERAL_INTEIRO     { $$ = create_literal_node(yytext, inteiro); }
+//        | LITERAL_REAL        { $$ = create_literal_node(yytext, real); }
+//        | LITERAL_BOOLEANO    { $$ = create_literal_node(yytext, booleano); }
+//        | LITERAL_STRING      { $$ = create_literal_node(yytext, string); }
+//        | LITERAL_CARACTERE   { $$ = create_literal_node(yytext, caractere); }
+//        ;
+
 literal: LITERAL_INTEIRO     { $$ = inteiro; }
        | LITERAL_REAL        { $$ = real; }
        | LITERAL_BOOLEANO    { $$ = booleano; }
@@ -221,10 +243,10 @@ enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechame
 retorne: RETORNE expressao_opc
        ;
 
-expressao: terminal_exp_cast_opc operador_binario expressao
-         | operador_unario expressao
-         | PAR_ESQ expressao PAR_DIR
-         | terminal_exp_cast_opc
+expressao: terminal_exp_cast_opc operador_binario expressao   { $$ = $1; } //So o primeiro
+         | operador_unario expressao                          { $$ = $2; }
+         | PAR_ESQ expressao PAR_DIR                          { $$ = $2; }
+         | terminal_exp_cast_opc                              { $$ = $1; }
          ;
 
 expressao_opc: /* vazio */
@@ -269,52 +291,54 @@ operador_logico_unario: NAO_LOGICO
                       | NAO_BITS
                       ;
 
-terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  {  }
-                     | terminal_exp                       {  }
+terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { $$ = $2; } //Verificar se o terminal pode ser convertido nesse tipo
+                     | terminal_exp                       { $$ = $1; }
                      ;
 
-terminal_exp: literal
-            | ID
-            | ID argumentos_chamada
-            | ID indices_array
-            | ID campos_registro
+terminal_exp: literal                  { $$ = $1; }  //Retorna o tipo do literal
+            | ID                       {  }  //Consulta na tabela a variável e retorna o seu tipo
+            | ID argumentos_chamada    {  }  //Consulta na tabela o procedimento/função e retorna o seu tipo de retorno
+            | ID indices_array         {  }  //Consulta na tabela o array e retorna o seu tipo
+            | ID campos_registro       {  }  //Consulta na tabela o campo do registro e retorna o seu tipo
             ;
 
-argumentos_chamada: PAR_ESQ argumentos PAR_DIR
+argumentos_chamada: PAR_ESQ argumentos PAR_DIR  {  }  //
                   ;
 
-argumentos: expressao
-          | expressao VIRGULA argumentos
+argumentos: expressao                      { $$ = $1; }  //Adicionar e retornar um array com o tipo da expressao
+          | expressao VIRGULA argumentos   {  }  //Adicionar e retornar um array com o tipo da expressao
           ;
 
 %%
 
-int main (int argc, char *argv[]) { 
+int main (int argc, char *argv[]) {
     if (argc != 2) {
-        printf("Usage: %s filename", argv[0]);
+        printf("Uso: %s nome_do_arquivo", argv[0]);
     } else {
         char *filename = argv[1];
         FILE *file = fopen(filename,"r+");
-       
+
         if(file == NULL) {
-            printf("Unable to open file.\n");
+            printf("Não foi possível abrir o arquivo.\n");
         } else {
             escopo_atual = cria_escopo(escopo_atual);
             yyin = file;
             yyparse();
         }
-    
+
         fclose(file);
     }
 }
 
 int yyerror (char *msg) {
-  fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+  fprintf (stderr, "%d: %s em '%s'\n", yylineno, msg, yytext);
   return 0;
 }
 
-no_t* create_literal_node(char* identificador, valor_t valor) {
-    
-    no_t* no = () malloc(sizeof(no_t));
-
+no_t* create_literal_node(tipo_t tipo, char *valor) {
+  no_t* no = (no_t*) malloc(sizeof(no_t));
+  no->tipo = tipo;
+  no->codigo = strdup(valor);
+  no->variavel = NULL;
+  return no;
 }

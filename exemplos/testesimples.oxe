@@ -1,0 +1,7 @@
+principal {
+    inteiro a = "Teste";
+    inteiro b = 2 + 3;
+    real c = 2.6;
+    real c = falso;
+    booleano bool = verdadeiro;
+}
