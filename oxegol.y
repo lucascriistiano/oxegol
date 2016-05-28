@@ -4,6 +4,7 @@
   #include <string.h>
   #include "hash.h"
   #include "escopo.h"
+  #include "aux.h"
 
   int yylex();
   int yyerror(char *s);
@@ -11,26 +12,22 @@
   extern char * yytext;
   extern FILE * yyin;
 
-  typedef struct no_s {
-      variavel_t *variavel;
-      tipo_t tipo;
-      char *codigo;
-  } no_t;
-
-  no_t* create_literal_node(tipo_t tipo, char *valor);
-
   escopo_t *escopo_atual;
   int numero_escopo_atual = 0;
 %}
 
 %union {
-  int   ival;  /* valor inteiro */
-  float fval;  /* valor float */
-  char  cval;  /* valor caractere */
-  char* sval;  /* valor string */
-  int   bval;  /* valor booleano - verdadeiro: 1; falso: 0; */
+  //int   ival;  /* valor inteiro */
+  //float fval;  /* valor float */
+  //char  cval;  /* valor caractere */
+  //char* sval;  /* valor string */
+  //int   bval;  /* valor booleano - verdadeiro: 1; falso: 0; */
 
+  char* id;  /* id value */
+
+  valor_t valor;
   tipo_t tipo;
+  no_literal_t* no_literal;
 };
 
 %token PRINCIPAL PROCEDIMENTO FUNCAO RETORNE GLOBAL
@@ -48,7 +45,10 @@
 %left MAIS MENOS
 %left ASTERISCO BARRA MOD
 
-%type<tipo> inicializacao_opc atribuicao tipo expressao var_declaradas literal terminal_exp terminal_exp_cast_opc argumentos ID
+%type<tipo> inicializacao_opc atribuicao tipo expressao var_declaradas terminal_exp terminal_exp_cast_opc argumentos ID
+
+%type<no_literal> literal
+%type<valor> LITERAL_INTEIRO LITERAL_REAL LITERAL_BOOLEANO LITERAL_STRING LITERAL_CARACTERE
 
 %%
 
@@ -63,12 +63,11 @@ declaracoes_var: declaracao_var PONTO_E_VIRGULA
                | declaracoes_var declaracao_var PONTO_E_VIRGULA
                ;
 
-declaracao_var: tipo indices_array_opc var_declaradas  { if($1 != $3) {
-                                                            yyerror("Tipos incompatíveis");
-                                                          } else {
-                                                            printf("Tipos compatíveis\n");
-                                                          }
-                                                        } //Só com uma
+// declaracao_var: tipo indices_array_opc var_declaradas  { alocar_variaveis($1, $2, $3);
+//                                                          verificar_tipos_declaracao($1, $2, $3); }
+//               ;
+
+declaracao_var: tipo indices_array_opc var_declaradas  { if($1 != $3) { printf("Tipos incompatíveis\n");} else { printf("Compatíveis\n"); } }
               ;
 
 var_declaradas: ID inicializacao_opc                         { $$ = $2; }
@@ -81,8 +80,12 @@ inicializacao_opc: /* vazio */   {  }
 atribuicao: ATRIBUICAO expressao     { $$ = $2; }
           ;
 
-indices_array_opc: /* vazio */
-                 | indices_array
+// indices_array_opc: /* vazio */      {  }
+//                  | indices_array    { $$ = $1; }
+//                  ;
+
+indices_array_opc: /* vazio */      {  }
+                 | indices_array    {  }
                  ;
 
 indices_array: array
@@ -138,7 +141,7 @@ comando: se
 instrucao: retorne
          | PARE
          | declaracao_var
-         | ID indices_array_opc atribuicao
+         | ID indices_array_opc atribuicao  {  } //Verificar: se id está declarado,
          | ID INCREMENTO
          | ID DECREMENTO
          | ID argumentos_chamada
@@ -190,18 +193,11 @@ tipo: INTEIRO               { $$ = inteiro; }
     | ACESSO_REGISTRO ID    { $$ = $2; }
     ;
 
-// literal: LITERAL_INTEIRO     { $$ = create_literal_node(yytext, inteiro); }
-//        | LITERAL_REAL        { $$ = create_literal_node(yytext, real); }
-//        | LITERAL_BOOLEANO    { $$ = create_literal_node(yytext, booleano); }
-//        | LITERAL_STRING      { $$ = create_literal_node(yytext, string); }
-//        | LITERAL_CARACTERE   { $$ = create_literal_node(yytext, caractere); }
-//        ;
-
-literal: LITERAL_INTEIRO     { $$ = inteiro; }
-       | LITERAL_REAL        { $$ = real; }
-       | LITERAL_BOOLEANO    { $$ = booleano; }
-       | LITERAL_STRING      { $$ = string; }
-       | LITERAL_CARACTERE   { $$ = caractere; }
+literal: LITERAL_INTEIRO     { $$ = criar_no_literal(inteiro, $1); }
+       | LITERAL_REAL        { $$ = criar_no_literal(real, $1); }
+       | LITERAL_BOOLEANO    { $$ = criar_no_literal(booleano, $1); }
+       | LITERAL_STRING      { $$ = criar_no_literal(string, $1); }
+       | LITERAL_CARACTERE   { $$ = criar_no_literal(caractere, $1); }
        ;
 
 se: SE PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco senao_opc
@@ -295,7 +291,7 @@ terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { $$ = $2; } //Verific
                      | terminal_exp                       { $$ = $1; }
                      ;
 
-terminal_exp: literal                  { $$ = $1; }  //Retorna o tipo do literal
+terminal_exp: literal                  { $$ = $1->tipo; }  //Retorna o tipo do literal
             | ID                       {  }  //Consulta na tabela a variável e retorna o seu tipo
             | ID argumentos_chamada    {  }  //Consulta na tabela o procedimento/função e retorna o seu tipo de retorno
             | ID indices_array         {  }  //Consulta na tabela o array e retorna o seu tipo
@@ -331,14 +327,6 @@ int main (int argc, char *argv[]) {
 }
 
 int yyerror (char *msg) {
-  fprintf (stderr, "%d: %s em '%s'\n", yylineno, msg, yytext);
+  fprintf (stderr, "%d: %s próximo de '%s'\n", yylineno, msg, yytext);
   return 0;
-}
-
-no_t* create_literal_node(tipo_t tipo, char *valor) {
-  no_t* no = (no_t*) malloc(sizeof(no_t));
-  no->tipo = tipo;
-  no->codigo = strdup(valor);
-  no->variavel = NULL;
-  return no;
 }

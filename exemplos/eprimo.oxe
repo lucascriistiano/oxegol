@@ -1,7 +1,7 @@
 funcao ePrimo(inteiro numero) -> booleano {
-    inteiro i;
     inteiro div = 0;
 
+    inteiro i;
     para (i de 1 ate numero) {
         se (numero % i == 0) {
            div++;

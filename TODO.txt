@@ -7,6 +7,8 @@ OK - Para cada } decrementar a variável escopo e remover uma entrada da lista d
 - Para cada operação, verificar os tipos
 
 - Repetir os passos acima para as declarações de funções e procedimentos
+
+- Verificar se os tipos das expressões do PARA são aritméticas
 OK - FOpen e FClose no YACC
 
 - Corrigir retorno do tipo registro na regra "tipo" no Yacc

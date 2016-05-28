@@ -3,19 +3,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <limits.h>
 #include <string.h>
-
-typedef enum {
-    inteiro, real, booleano, caractere, string
-} tipo_t;
-
-typedef struct variavel_s {
-    char *chave;
-    tipo_t tipo;
-    int tamanho;
-    struct variavel_s *proximo;
-} variavel_t;
+#include <limits.h>
+#include "aux.h"
 
 typedef struct {
     int tamanho;

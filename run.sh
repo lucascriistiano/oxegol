@@ -3,7 +3,7 @@
 # Compilacao e execucao
 flex oxegol.l
 yacc -d -v oxegol.y
-cc lex.yy.c y.tab.c hash.c escopo.c -o programa.oxe
+cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
 
 # Executar exemplos
 # echo '===== Quicksort ====='

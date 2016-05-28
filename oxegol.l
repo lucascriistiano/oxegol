@@ -11,6 +11,7 @@
     #include <string.h>
     #include "hash.h"
     #include "escopo.h"
+    #include "aux.h"
     #include "y.tab.h"
 
     extern int yyerror (char *msg);
@@ -97,14 +98,13 @@ digitos [0-9]+
 "ou"       { return OU_LOGICO; }
 "nao"      { return NAO_LOGICO; }
 
+{digitos}                                 { yylval.valor.ival = atoi(yytext); return LITERAL_INTEIRO; }
+(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { yylval.valor.fval = atof(yytext); return LITERAL_REAL; }
+("verdadeiro"|"falso")                    { if(strcmp(yytext, "verdadeiro") == 0) { yylval.valor.bval = 1; } else { yylval.valor.bval = 0; } return LITERAL_BOOLEANO; }
+\"[a-zA-Z0-9\_\ ]*\"                      { yylval.valor.sval = strdup(yytext); return LITERAL_STRING; }
+'.'                                       { yylval.valor.cval = yytext[1]; return LITERAL_CARACTERE; }
 
-{digitos}                                 { yylval.ival = atoi(yytext); return LITERAL_INTEIRO; }
-(({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { yylval.fval = atof(yytext); return LITERAL_REAL; }
-("verdadeiro"|"falso")                    { if(strcmp(yytext, "verdadeiro") == 0) { yylval.bval = 1; } else { yylval.bval = 0; } return LITERAL_BOOLEANO; }
-\"[a-zA-Z0-9\_\ ]*\"                        { yylval.sval = strdup(yytext); return LITERAL_STRING; }
-'.'                                       { yylval.cval = yytext[1]; return LITERAL_CARACTERE; }
-
-[a-zA-Z][a-zA-Z0-9\_]* { yylval.sval = strdup(yytext); return ID; }
+[a-zA-Z][a-zA-Z0-9\_]* { yylval.id = strdup(yytext); return ID; }
 
 [ \n\t\r]+                      { /* Nao faz nada para espacos em branco */ }
 "/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios multi linhas */ }
