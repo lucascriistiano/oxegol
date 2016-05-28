@@ -7,9 +7,11 @@
 
 /* Declaracoes C */
 %{
-    #include "y.tab.h"
-    #include "stdio.h"
+    #include <stdio.h>
     #include <string.h>
+    #include "hash.h"
+    #include "escopo.h"
+    #include "y.tab.h"
 
     extern int yyerror (char *msg);
 %}

@@ -1,10 +1,8 @@
-#include <stdio.h>
 #include "escopo.h"
-#include "hash.h"
 
 escopo_t *cria_escopo(escopo_t *escopo_atual) {
     printf("Criando escopo\n");
-    
+
     if (escopo_atual == NULL) { //Falta fazer testes de alocação
         escopo_atual = (escopo_t*) malloc(sizeof(escopo_t));
         escopo_atual->tabela_hash = (tabela_hash_t*) malloc(sizeof(tabela_hash_t));
@@ -20,7 +18,7 @@ escopo_t *cria_escopo(escopo_t *escopo_atual) {
 
 escopo_t *apaga_escopo(escopo_t *escopo_atual) {
     printf("Apagando escopo\n");
-    
+
     if(escopo_atual != NULL) {
         escopo_t *escopo_anterior = escopo_atual->anterior;
         free(escopo_atual->tabela_hash);
@@ -34,10 +32,10 @@ escopo_t *apaga_escopo(escopo_t *escopo_atual) {
 variavel_t *consulta_escopos(escopo_t *escopo_atual, char *chave) {
     if (escopo_atual != NULL) {
         tabela_hash_t *tabela_hash_escopo_atual = escopo_atual->tabela_hash;
-        
+
         variavel_t *variavel_encontrada =  busca_variavel(tabela_hash_escopo_atual, chave);
         if(variavel_encontrada == NULL) {
-            return consulta_escopos(escopo_atual->anterior, chave);   
+            return consulta_escopos(escopo_atual->anterior, chave);
         } else {
             return variavel_encontrada;
         }
@@ -49,7 +47,7 @@ variavel_t *consulta_escopos(escopo_t *escopo_atual, char *chave) {
 variavel_t *consulta_escopo_atual(escopo_t *escopo_atual, char *chave) {
     if (escopo_atual != NULL) {
         tabela_hash_t *tabela_hash_escopo_atual = escopo_atual->tabela_hash;
-        
+
         variavel_t *variavel_encontrada =  busca_variavel(tabela_hash_escopo_atual, chave);
         return variavel_encontrada;
     } else {

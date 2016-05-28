@@ -1,12 +1,8 @@
 /*
   Código adaptado do github : https://gist.github.com/tonious/1377667
- */
- #define _XOPEN_SOURCE 500 /* Enable certain library functions (strdup) on linux.  See feature_test_macros(7) */
+*/
+#define _XOPEN_SOURCE 500 /* Enable certain library functions (strdup) on linux.  See feature_test_macros(7) */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
 #include "hash.h"
 
 /* Cria uma nova tabela hash. */
@@ -89,7 +85,7 @@ int atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo_t tipo, int 
     /* Já existe uma variavel. Não substitui o seu conteúdo e retorna erro. */
     if(proximo != NULL && proximo->chave != NULL && strcmp(chave, proximo->chave) == 0) {
         return 1;
-        
+
     /* Nenhum par encontrado. Cria uma nova variável. */
     } else {
         variavel_nova = nova_variavel(chave, tipo, tamanho);
@@ -108,7 +104,7 @@ int atualiza_variavel(tabela_hash_t *tabela_hash, char *chave, tipo_t tipo, int 
             variavel_nova->proximo = proximo;
             ultimo->proximo = variavel_nova;
         }
-        
+
         return 0;
     }
 }

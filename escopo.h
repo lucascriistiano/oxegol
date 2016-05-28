@@ -1,15 +1,14 @@
 #ifndef ESCOPO_H
 #define ESCOPO_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "hash.h"
 
-struct escopo_s {
+typedef struct escopo_s {
     tabela_hash_t *tabela_hash;
     struct escopo_s *anterior;
-};
-
-typedef struct escopo_s escopo_t;
+} escopo_t;
 
 escopo_t *cria_escopo(escopo_t *escopo_atual); //push
 escopo_t *apaga_escopo(escopo_t *escopo_atual); //pop

@@ -9,11 +9,17 @@ OK - Para cada } decrementar a variável escopo e remover uma entrada da lista d
 - Repetir os passos acima para as declarações de funções e procedimentos
 OK - FOpen e FClose no YACC
 
+- Corrigir retorno do tipo registro na regra "tipo" no Yacc
+- Apagar todos os escopos no final
+
+- Descobrir como corrigir as mensagens de erro (mensagens mais significativas, número da linha)
+    http://stackoverflow.com/questions/16443056/yylineno-has-always-the-same-value-in-yacc-file
 
 - apagar variáveis locais e argumentos de um escopo anterior (de mesmo nível)
 - P/ segunda:
     - Tabela hash integrada com o reconhecimento de tipos
 
+- Primeiro colocar o id na Hash e depois consultar se tipos se os tipos são compatíveis
 
 erros:
 - [] em parâmetros
