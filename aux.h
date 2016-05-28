@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum {
     inteiro, real, booleano, caractere, string
@@ -44,5 +45,14 @@ no_variavel_t* criar_no_variavel(tipo_t tipo, valor_t valor);
 
 int alocar_variaveis(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
 int verificar_tipos_atribuicao(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
+
+char* concatenar_strings(char* primeira, char* segunda);
+char* gerar_label(char* comando, int numero);
+char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada, char* comandos);
+char* gerar_enquanto(int nenquanto, char* exp_parada, char*comandos);
+char* gerar_escolha(char* id, char*  caso_um_mais, char* caso_contrario);
+char* gerar_caso(char* valor, char*  comandos);
+char* gerar_caso_contrario(char*  comandos);
+char* gerar_se(char* exp, char* comandos, char* senao_opc, char* comandos_senao);
 
 #endif

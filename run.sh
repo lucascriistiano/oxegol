@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Compilacao e execucao
+# ================== COMPILACAO ==================
 flex oxegol.l
 yacc -d -v oxegol.y
 cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
 
-# Executar exemplos
+# ============= EXECUCAO DE EXEMPLOS =============
 # echo '===== Quicksort ====='
 # ./programa.oxe exemplos/quicksort.oxe
 
@@ -24,14 +24,23 @@ cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
 # echo '===== Deslocamento ====='
 # ./programa.oxe exemplos/deslocamento.oxe
 
-echo '===== Teste Simple ====='
+echo '===== Teste Simples ====='
 ./programa.oxe exemplos/testesimples.oxe
 
-# Compilação do Hash
-# gcc -o test testeHash.c hash.c -lm
-
-# Limpeza de arquivos criados
+# =================== LIMPEZA ===================
 rm lex.yy.c
 rm y.output
 rm y.tab.c
 rm y.tab.h
+rm programa.oxe
+
+# =================== TESTES ===================
+# echo '===== Hash ====='
+# cc testeHash.c hash.c -o testeHash
+# ./testeHash
+# rm testeHash
+
+# echo '===== Gerar Instrucoes ====='
+# cc testeGeraInstrucao.c hash.c -o testeGeraInstrucao
+# ./testeGeraInstrucao
+# rm testeGeraInstrucao
