@@ -1,0 +1,32 @@
+(1) Estrutura sintática:
+  (A) Introdução e detecção de erros léxicos e sintáticos;
+  (B) Como o programa/estrutura pode ser derivado das regras sintáticas?
+  (C) Gerar fontes que incluam instruções que originam conflito shift-reduce. Ações corretas?
+
+(2) Variáveis:
+  (A) Variáveis omitidas - detectar erros;
+  (B) Variáveis duplicadas no mesmo escopo - detectar erros;
+  (C) Variáveis duplicadas em escopos distintos e não-aninhados - testar acessos;
+  (D) Variáveis duplicadas em escopos distintos e aninhados - testar acessos.
+ 
+(3) Expressões: 
+  (A) Identificar e testar coerções permitidas. Mostrar operações para compatibilização de tipos.
+  (B) Misturar tipos incompatíveis e testar detecção de erros.
+ 
+(4) Passagem de parâmetros:
+  (A) Corretamente transmitidos ao subprograma chamado?
+  (B) Alterados/inalterados corretamente após retorno do subprograma chamado?
+
+Programas a Implementar para Avaliação:
+
+(1) Apenas programas escritos na linguagem do grupo e traduzidos por seu compilador para C reduzido serão aceitos.
+
+(2) Programas não-recursivos (implementar antes da avaliação):
+  (A) Leitura de valores (envolvendo tipos distintos), avaliação de expressões, atribuições e escrita em tela.
+  (B) Busca de um elemento k em um vetor contendo n elementos.
+  (C) Leitura de duas matrizes A e B, cálculo e impressão da matriz C = A * B.
+  (D) Criação e uso de módulos para cálculo das operações aritméticas (binárias) elementares.
+
+(3) Programas recursivos (implementar antes da avaliação):
+  (A) Fatorial.
+  (B) Fibonacci.
