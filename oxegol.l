@@ -52,7 +52,7 @@ digitos [0-9]+
 "leia"          { return LEIA; }
 "imprima"       { return IMPRIMA; }
 "comparatexto"  { return COMPARATEXTO; }
-"concatenatexto"{ return CONCATENATEXTO; }
+"concatenatexto" { return CONCATENATEXTO; }
 
 "ref"        { return REFERENCIA; }
 "reg"        { return ACESSO_REGISTRO; }

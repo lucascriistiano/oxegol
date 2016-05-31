@@ -7,6 +7,71 @@ no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor) {
   return no;
 }
 
+no_operador_t* criar_no_operador(tipo_t tipo, tipo_t retorno, int num_op) {
+    //TODO Verificar se conseguiu alocar
+    no_operador_t* novo_operador = (no_operador_t*) malloc(sizeof(no_operador_t));
+    novo_operador->tipo = tipo;
+    novo_operador->retorno = retorno;
+    novo_operador->num_op = num_op;
+    novo_operador->proximo = NULL;
+    return novo_operador;
+}
+
+void adicionar_tipo(no_operador_t* operador, tipo_t tipo, tipo_t retorno, int num_op) {
+    no_operador_t* operador_atual = operador;
+    while (operador_atual->proximo != NULL) {
+        operador_atual = operador_atual->proximo;
+    }
+
+    //TODO Verificar se conseguiu alocar (para todos os outros => Ctrl + F malloc)
+    no_operador_t* novo_operador = criar_no_operador(tipo, retorno, num_op);
+    operador_atual->proximo = novo_operador;
+}
+
+// int verificar_tipos_atribuicao(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel) {
+//     //Implementar
+// }
+
+int verificar_compatibilidade_operacao_binaria(no_operador_t* operador, tipo_t tipo_op1, tipo_t tipo_op2) {
+    // Tipos diferentes são incompatíveis
+    if(tipo_op1 != tipo_op2) {
+        return 0; //Tipos incompatíveis
+    }
+
+    // Verifica se o operador aceita o tipo dos operadores
+    no_operador_t* operador_posicionado = operador;
+    while(operador_posicionado->tipo != tipo_op1 && operador_posicionado->proximo != NULL) {
+        operador_posicionado = operador_posicionado->proximo;
+    }
+    if(operador_posicionado->tipo != tipo_op1) {
+        return 0; // Tipo não aceito
+    }
+
+    return 1; // Tipos compatíveis e aceitos pelo operador
+}
+
+int verificar_compatibilidade_operacao_unaria(no_operador_t* operador, tipo_t tipo_op) {
+    // Verifica se o operador aceita o tipo do operador
+    no_operador_t* operador_posicionado = operador;
+    while(operador_posicionado->tipo != tipo_op && operador_posicionado->proximo != NULL) {
+        operador_posicionado = operador_posicionado->proximo;
+    }
+    if(operador_posicionado->tipo != tipo_op) {
+        return 0; // Tipo não aceito
+    }
+
+    return 1; // Tipos aceito pelo operador
+}
+
+tipo_t verificar_tipo_retorno(no_operador_t* operador, tipo_t tipo) {
+    no_operador_t* operador_posicionado = operador;
+    while(operador_posicionado->tipo != tipo && operador_posicionado->proximo != NULL) {
+        operador_posicionado = operador_posicionado->proximo;
+    }
+
+    return operador_posicionado->retorno;
+}
+
 char* concatenar_strings(char* primeira, char* segunda) {
     size_t tamanho = strlen(primeira) + strlen(segunda) + 1;
     char *resultado = malloc(tamanho*sizeof(char));
