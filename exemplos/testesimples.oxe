@@ -1,7 +1,17 @@
 principal {
-    inteiro a = "Teste";
-    inteiro b = 2 + 3;
-    real c = 2.6;
-    real c = falso;
-    booleano bool = verdadeiro;
+    //inteiro a = "Teste";
+    //inteiro b = 2 + "kkkk";
+    //booleano c = 3 < (2.6 + 1);
+    //booleano d = (((1 + 4) > 10) * 10) + 10; //Funciona mais ou menos
+    //booleano f = 10 * 3 + 2;
+    //real c = falso;
+    //booleano bool = verdadeiro;
+
+    inteiro a = 2;
+    2++; //cai em instrucao
+
+    //++2;
+    //booleano b = verdadeiro;
+    //nao falso;
+
 }

@@ -6,7 +6,7 @@
 #include <string.h>
 
 typedef enum {
-    inteiro, real, booleano, caractere, string
+    inteiro, real, booleano, caractere, string, vazio
 } tipo_t;
 
 typedef union valor_u {
@@ -40,11 +40,24 @@ typedef struct indices_array_s {
   struct indices_array_s *proximo;
 } indice_array_t;
 
+typedef struct no_operador_s {
+  tipo_t tipo;                   // Tipo dos operandos aceitos
+  tipo_t retorno;                // Tipo de retorno da aplicação do operador
+  int num_op;                    // Numero de operandos
+  struct no_operador_s *proximo; // Proximas informações de tipos aceitos e retorno do operador
+} no_operador_t;
+
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor);
 no_variavel_t* criar_no_variavel(tipo_t tipo, valor_t valor);
+no_operador_t* criar_no_operador(tipo_t tipo, tipo_t retorno, int num_op);
 
 int alocar_variaveis(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
-int verificar_tipos_atribuicao(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
+// int verificar_tipos_atribuicao(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
+int verificar_compatibilidade_operacao_binaria(no_operador_t* operador, tipo_t tipo_op1, tipo_t tipo_op2);
+int verificar_compatibilidade_operacao_unaria(no_operador_t* operador, tipo_t tipo_op);
+tipo_t verificar_tipo_retorno(no_operador_t* operador, tipo_t tipo);
+
+void adicionar_tipo(no_operador_t* operador, tipo_t tipo, tipo_t retorno, int num_op);
 
 char* concatenar_strings(char* primeira, char* segunda);
 char* gerar_label(char* comando, int numero);
