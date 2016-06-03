@@ -6,15 +6,15 @@
 #include "aux.h"
 #include "hash.h"
 
-typedef struct escopo_s {
-    tabela_hash_t *tabela_hash;
-    struct escopo_s *anterior;
-} escopo_t;
+typedef struct escopo_variaveis_s {
+    hash_variaveis_t *hash_variaveis;
+    struct escopo_variaveis_s *anterior;
+} escopo_variaveis_t;
 
-escopo_t *cria_escopo(escopo_t *escopo_atual); //push
-escopo_t *apaga_escopo(escopo_t *escopo_atual); //pop
-variavel_t *consulta_escopos(escopo_t *escopo_atual, char *chave); //get todos escopos
-variavel_t *consulta_escopo_atual(escopo_t *escopo_atual, char *chave); //get escopo atual
-int criar_variavel_escopo_atual(escopo_t *escopo_atual, char *chave, tipo_t tipo, int tamanho);
+escopo_variaveis_t *cria_escopo(escopo_variaveis_t *escopo_atual); //push
+escopo_variaveis_t *apaga_escopo(escopo_variaveis_t *escopo_atual); //pop
+variavel_t *consulta_escopos(escopo_variaveis_t *escopo_atual, char *id); //get todos escopos
+variavel_t *consulta_escopo_atual(escopo_variaveis_t *escopo_atual, char *id); //get escopo atual
+int criar_variavel_escopo_atual(escopo_variaveis_t *escopo_atual, char *id, tipo_t tipo, int tamanho);
 
 #endif

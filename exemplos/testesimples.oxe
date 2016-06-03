@@ -1,17 +1,27 @@
-principal {
+//procedimento teste() {
+//}
+
+funcao teste(inteiro a) -> inteiro {
+    inteiro b = 2;
+}
+
+funcao teste() -> inteiro {
+    inteiro b = 2;
+}
+
+principal() {
     //inteiro a = "Teste";
-    //inteiro b = 2 + "kkkk";
+    inteiro b = 2;
     //booleano c = 3 < (2.6 + 1);
     //booleano d = (((1 + 4) > 10) * 10) + 10; //Funciona mais ou menos
     //booleano f = 10 * 3 + 2;
     //real c = falso;
     //booleano bool = verdadeiro;
 
-    inteiro a = 2;
-    2++; //cai em instrucao
+    //inteiro a = 2;
+    //2++; //cai em instrucao
 
-    //++2;
-    //booleano b = verdadeiro;
+    //inteiro b;
     //nao falso;
-
+    //2++;
 }

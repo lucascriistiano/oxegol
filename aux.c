@@ -17,6 +17,55 @@ no_operador_t* criar_no_operador(tipo_t tipo, tipo_t retorno, int num_op) {
     return novo_operador;
 }
 
+no_indice_array_t* criar_no_indice_array(int indice) {
+    no_indice_array_t* novo_indice = (no_indice_array_t*) malloc(sizeof(no_indice_array_t));
+    novo_indice->indice = indice;
+    novo_indice->proximo = NULL;
+    return novo_indice;
+}
+
+no_parametro_t* criar_no_parametro(char *id, tipo_t tipo) {
+    no_parametro_t* novo_parametro = (no_parametro_t*) malloc(sizeof(no_parametro_t));
+    novo_parametro->id = strdup(id);
+    novo_parametro->tipo = tipo;
+    novo_parametro->proximo = NULL;
+    return novo_parametro;
+}
+
+no_indice_array_t* adicionar_no_indice_array(no_indice_array_t* indice_array, int indice) {
+    no_indice_array_t* novo_indice = criar_no_indice_array(indice);
+
+    //Navega até a última posição
+    no_indice_array_t* indice_atual = indice_array;
+    while(indice_atual->proximo != NULL) {
+        indice_atual = indice_atual->proximo;
+    }
+    indice_atual->proximo = novo_indice;
+    return indice_array;
+}
+
+// no_parametro_t* adicionar_no_parametro(no_parametro_t* parametros, char *id, tipo_t tipo) {
+//     no_parametro_t* novo_parametro = criar_no_parametro(id, tipo);
+
+//     //Navega até a última posição
+//     no_parametro_t* parametro_atual = parametros;
+//     while(parametro_atual->proximo != NULL) {
+//         parametro_atual = parametro_atual->proximo;
+//     }
+//     parametro_atual->proximo = novo_parametro;
+//     return parametros;
+// }
+
+no_parametro_t* adicionar_no_parametro(no_parametro_t* parametros, no_parametro_t* novo_parametro) {
+    //Navega até a última posição
+    no_parametro_t* parametro_atual = parametros;
+    while(parametro_atual->proximo != NULL) {
+        parametro_atual = parametro_atual->proximo;
+    }
+    parametro_atual->proximo = novo_parametro;
+    return parametros;
+}
+
 void adicionar_tipo(no_operador_t* operador, tipo_t tipo, tipo_t retorno, int num_op) {
     no_operador_t* operador_atual = operador;
     while (operador_atual->proximo != NULL) {

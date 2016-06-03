@@ -41,6 +41,6 @@ rm programa.oxe
 # rm testeHash
 
 # echo '===== Gerar Instrucoes ====='
-# cc testeGeraInstrucao.c hash.c -o testeGeraInstrucao
+# gcc -o testeGeraInstrucao testeGeraInstrucao.c aux.c
 # ./testeGeraInstrucao
 # rm testeGeraInstrucao

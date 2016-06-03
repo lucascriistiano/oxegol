@@ -23,7 +23,7 @@ typedef struct {
 } no_literal_t;
 
 typedef struct variavel_s {
-    char *chave;
+    char *id;
     tipo_t tipo;
     int tamanho;
     struct variavel_s *proximo;
@@ -35,10 +35,24 @@ typedef struct no_variavel_s {
   struct no_variavel_s* proximo;
 } no_variavel_t;
 
+typedef struct subprograma_s {
+    char *id;
+    tipo_t retorno;
+    int num_parametros;
+    tipo_t* tipos_parametros;
+    struct subprograma_s *proximo;
+} subprograma_t;
+
+typedef struct no_subprograma_s {
+  subprograma_t *subprograma;
+  char *codigo;
+  struct no_subprograma_s* proximo;
+} no_subprograma_t;
+
 typedef struct indices_array_s {
   int indice;
   struct indices_array_s *proximo;
-} indice_array_t;
+} no_indice_array_t;
 
 typedef struct no_operador_s {
   tipo_t tipo;                   // Tipo dos operandos aceitos
@@ -47,12 +61,24 @@ typedef struct no_operador_s {
   struct no_operador_s *proximo; // Proximas informações de tipos aceitos e retorno do operador
 } no_operador_t;
 
+typedef struct no_parametro_s {
+  char *id;                       // ID do parâmetro
+  tipo_t tipo;                    // Tipo do parâmetro
+  struct no_parametro_s *proximo; // Proximos parâmetros identificados
+} no_parametro_t;
+
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor);
 no_variavel_t* criar_no_variavel(tipo_t tipo, valor_t valor);
 no_operador_t* criar_no_operador(tipo_t tipo, tipo_t retorno, int num_op);
+no_indice_array_t* criar_no_indice_array(int indice);
+no_parametro_t* criar_no_parametro(char *id, tipo_t tipo);
 
-int alocar_variaveis(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
-// int verificar_tipos_atribuicao(tipo_t tipo, indice_array_t *indices_array, no_variavel_t *no_variavel);
+no_indice_array_t* adicionar_no_indice_array(no_indice_array_t* indice_array, int indice);
+// no_parametro_t* adicionar_no_parametro(no_parametro_t* parametros, char *id, tipo_t tipo);
+no_parametro_t* adicionar_no_parametro(no_parametro_t* parametros, no_parametro_t* novo_parametro);
+
+int alocar_variaveis(tipo_t tipo, no_indice_array_t *indices_array, no_variavel_t *no_variavel);
+// int verificar_tipos_atribuicao(tipo_t tipo, no_indice_array_t *indices_array, no_variavel_t *no_variavel);
 int verificar_compatibilidade_operacao_binaria(no_operador_t* operador, tipo_t tipo_op1, tipo_t tipo_op2);
 int verificar_compatibilidade_operacao_unaria(no_operador_t* operador, tipo_t tipo_op);
 tipo_t verificar_tipo_retorno(no_operador_t* operador, tipo_t tipo);

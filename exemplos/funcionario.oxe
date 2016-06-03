@@ -1,20 +1,25 @@
 registro funcionario {
-    string[30] nome;
+    string nome;
     inteiro idade;
     caractere sexo;
     real altura;
+    string[2] telefone;
 }
 
-principal {
+principal() {
     reg funcionario f;
 
     f.nome = "Joao";
     f.idade = 33;
     f.sexo = 'M';
     f.altura = 1.75;
+    f.telefone[0] = "12345678";
+    f.telefone[1] = "87654321";
 
     imprima("Nome ", f.nome);
     imprima("Idade ", f.idade);
     imprima("Sexo ", f.sexo);
     imprima("Altura ", f.altura);
+    imprima("Telefone 1 ", f.telefone[0]);
+    imprima("Telefone 2 ", f.telefone[1]);
 }

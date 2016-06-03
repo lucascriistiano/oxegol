@@ -12,8 +12,11 @@
   extern char * yytext;
   extern FILE * yyin;
 
-  escopo_t *escopo_atual;
   int numero_escopo_atual = 0;
+  escopo_variaveis_t *escopo_variaveis_atual;
+  hash_subprogramas_t *hash_subprogramas;
+
+  void verificar_declaracao_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros);
 %}
 
 %union {
@@ -26,8 +29,10 @@
 
   valor_t valor;
   tipo_t tipo;
-  no_literal_t* no_literal;
+  no_literal_t* literal;
   no_operador_t* operadores;
+  no_indice_array_t* indices_array;
+  no_parametro_t* parametros;
 
   char* codigo;
 };
@@ -47,15 +52,19 @@
 %left MAIS MENOS
 %left ASTERISCO BARRA MOD
 
-%type<tipo> ID inicializacao_opc atribuicao tipo expressao var_declaradas terminal_exp terminal_exp_cast_opc argumentos expressao_opc
+%type<tipo> inicializacao_opc atribuicao tipo expressao var_declaradas terminal_exp terminal_exp_cast_opc argumentos expressao_opc array_tamanho_indice
+%type<id> ID
 
 %type<codigo> instrucao
-%type<no_literal> literal
+%type<literal> literal
 %type<valor> LITERAL_INTEIRO LITERAL_REAL LITERAL_BOOLEANO LITERAL_STRING LITERAL_CARACTERE
 %type<operadores> operador_binario operador_logico_binario operador_logico_unario operador_aritmetico operador_relacional operador_unario incremento decremento INCREMENTO DECREMENTO
+
+%type<indices_array> indices_array_opc indices_array array
+%type<parametros> parametros_opc parametros parametro
 %%
 
-programa: secao_declaracoes_var secao_declaracoes_adicionais principal
+programa: secao_declaracoes_var { /* Joga codigo recebido das declaracoes de variaveis no arquivo */ } secao_declaracoes_adicionais { /* Joga codigo recebido das declaracoes de funcoes no arquivo */ } principal { /* Joga codigo recebido do procedimento principal no arquivo */ }
         ;
 
 secao_declaracoes_var: /* vazio */
@@ -83,32 +92,31 @@ inicializacao_opc: /* vazio */   {  }
 atribuicao: ATRIBUICAO expressao     { $$ = $2; }
           ;
 
-// indices_array_opc: /* vazio */      {  }
-//                  | indices_array    { $$ = $1; }
-//                  ;
-
 indices_array_opc: /* vazio */      {  }
-                 | indices_array    {  }
+                 | indices_array    { $$ = $1; }
                  ;
 
-indices_array: array
-             | indices_array array
+indices_array: array                { /*$$ = criar_no_indice_array(indice);*/ }
+             | indices_array array  { /*$$ = adicionar_no_indice_array($1, $2);*/  }
              ;
 
-array: COLCHETE_ESQ array_tamanho_indice COLCHETE_DIR
+//array: COLCHETE_ESQ array_tamanho_indice COLCHETE_DIR  { $$ = $2; }
+//     ;
+
+array: COLCHETE_ESQ array_tamanho_indice COLCHETE_DIR  {  }
      ;
 
-array_tamanho_indice: expressao
+array_tamanho_indice: terminal_exp   { $$ = $1; }
                     ;
 
-abertura_bloco: CHAVE_ESQ   { numero_escopo_atual++;
-                              //printf("entrando no escopo: %d\n", numero_escopo_atual);
-                              escopo_atual = cria_escopo(escopo_atual);
-                            }
+abertura_bloco: CHAVE_ESQ { numero_escopo_atual++;
+                            // printf("Entrando no escopo %d\n", numero_escopo_atual);
+                            escopo_variaveis_atual = cria_escopo(escopo_variaveis_atual);
+                          }
               ;
 
-fechamento_bloco: CHAVE_DIR { escopo_atual = apaga_escopo(escopo_atual);
-                              //printf("saindo do escopo: %d\n", numero_escopo_atual);
+fechamento_bloco: CHAVE_DIR { escopo_variaveis_atual = apaga_escopo(escopo_variaveis_atual);
+                              // printf("Saindo do escopo %d\n", numero_escopo_atual);
                               numero_escopo_atual--;
                             }
                 ;
@@ -127,7 +135,7 @@ declaracao: declaracao_registro
           | declaracao_proc
           ;
 
-principal: PRINCIPAL abertura_bloco comandos_opc fechamento_bloco
+principal: PRINCIPAL PAR_ESQ PAR_DIR abertura_bloco comandos_opc fechamento_bloco
          ;
 
 comandos_opc: /* vazio */
@@ -145,11 +153,13 @@ instrucao: retorne                          { }
          | PARE                             { }
          | declaracao_var                   { }
          | ID indices_array_opc atribuicao  { } //Verificar: se id está declarado para todos IDs
-         | ID incremento                    { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
+         | ID incremento                    { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, inteiro); //só para testes mudar
+                                              //int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
                                               if(operando_compativel) { $$ = "incremento"; }
                                               else { yyerror("Tipo não suportado"); }
                                             }
-         | ID decremento                    { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
+         | ID decremento                    { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, inteiro); //Só para testes mudar
+                                              //int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
                                               if(operando_compativel) { $$ = "decremento"; }
                                               else { yyerror("Tipo não suportado"); }
                                             }
@@ -160,9 +170,9 @@ instrucao: retorne                          { }
          | COMPARATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR {}
          | ID indices_array_opc concatena_texto  {}
          ;
-         
+
 concatena_texto: ATRIBUICAO CONCATENATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR //Desalocar a variavel
-    
+
 
 
 incremento: INCREMENTO  { no_operador_t* operadores = criar_no_operador(inteiro, inteiro, 1); $$ = operadores; }
@@ -174,10 +184,10 @@ decremento: DECREMENTO  { no_operador_t* operadores = criar_no_operador(inteiro,
 campos_registro: PONTO ID
                | campos_registro PONTO ID
 
-declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo abertura_bloco comandos_opc fechamento_bloco
+declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { verificar_declaracao_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { /* jogar variaveis na tabela de variaveis */  } comandos_opc fechamento_bloco { /* gera e joga código pra cima */ }
                ;
 
-declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR abertura_bloco comandos_opc fechamento_bloco
+declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { verificar_declaracao_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { /* jogar variaveis na tabela de variaveis */  } comandos_opc fechamento_bloco { /* gera e joga código pra cima */ }
                ;
 
 declaracao_registro: REGISTRO ID abertura_bloco campo_um_mais fechamento_bloco
@@ -190,19 +200,19 @@ campo_um_mais: campo
 campo: tipo indices_array_opc ID PONTO_E_VIRGULA
      ;
 
-parametros_opc: /* vazio */
-              | parametros
+parametros_opc: /* vazio */ { $$ = NULL; }
+              | parametros  { $$ = $1; }
               ;
 
-parametros: parametro
-          | parametro VIRGULA parametros
+parametros: parametro                     { $$ = $1; }
+          | parametro VIRGULA parametros  { $$ = adicionar_no_parametro($1, $3); }
           ;
 
-parametro: ref_opc tipo ID
+parametro: ref_opc tipo ID  { $$ = criar_no_parametro($3, $2); }
          ;
 
-ref_opc: /* vazio */
-       | REFERENCIA
+ref_opc: /* vazio */ {  }
+       | REFERENCIA  {  }
        ;
 
 tipo: INTEIRO               { $$ = inteiro; }
@@ -211,7 +221,7 @@ tipo: INTEIRO               { $$ = inteiro; }
     | CARACTERE             { $$ = caractere; }
     | BOOLEANO              { $$ = booleano; }
     | BYTE                  { $$ = caractere; }
-    | ACESSO_REGISTRO ID    { $$ = $2; }
+    | ACESSO_REGISTRO ID    { /* $$ = $2; */ $$ = inteiro; /* só para testes, mudar */ }
     ;
 
 literal: LITERAL_INTEIRO     { $$ = criar_no_literal(inteiro, $1); }
@@ -319,7 +329,7 @@ terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { $$ = $2; } //Verific
                      ;
 
 terminal_exp: literal                  { $$ = $1->tipo; }  //Retorna o tipo do literal
-            | ID                       {  }  //Consulta na tabela a variável e retorna o seu tipo
+            | ID                       { $$ = inteiro; /*Só para testes, mudar!!*/ }  //Consulta na tabela a variável e retorna o seu tipo
             | ID argumentos_chamada    {  }  //Consulta na tabela o procedimento/função e retorna o seu tipo de retorno
             | ID indices_array         {  }  //Consulta na tabela o array e retorna o seu tipo
             | ID campos_registro       {  }  //Consulta na tabela o campo do registro e retorna o seu tipo
@@ -344,9 +354,14 @@ int main (int argc, char *argv[]) {
         if(file == NULL) {
             printf("Não foi possível abrir o arquivo.\n");
         } else {
-            escopo_atual = cria_escopo(escopo_atual);
+            escopo_variaveis_atual = cria_escopo(escopo_variaveis_atual);
+            hash_subprogramas = criar_hash_subprogramas(TAMANHO_HASH);
+
             yyin = file;
+            yylineno = 1;
             yyparse();
+            //Compilar arquivo
+            //Apagar arquivo
         }
 
         fclose(file);
@@ -356,4 +371,16 @@ int main (int argc, char *argv[]) {
 int yyerror (char *msg) {
   fprintf (stderr, "%d: %s próximo de '%s'\n", yylineno, msg, yytext);
   return 0;
+}
+
+void verificar_declaracao_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros) {
+  subprograma_t* subprograma_encontrado = busca_subprograma(hash_subprogramas, id);
+  if(subprograma_encontrado == NULL) {
+    int subprograma_alocado = atualiza_subprograma(hash_subprogramas, id, retorno, parametros);
+    if(subprograma_alocado == 0) {
+      printf("DECLAROU %s\n", id);
+    }
+  } else {
+    yyerror("Redefinição de subprograma");
+  }
 }

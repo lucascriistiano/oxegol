@@ -2,7 +2,7 @@ global:
 inteiro a = 1;
 inteiro b = 2;
 
-principal {
+principal() {
     string binario;
     imprima("Escreva um valor binario ");
     leia(binario);

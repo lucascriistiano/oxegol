@@ -28,6 +28,6 @@ funcao algoritmo3(ref inteiro a, real b) -> inteiro {
 
 }
 
-principal {
+principal() {
 
 }

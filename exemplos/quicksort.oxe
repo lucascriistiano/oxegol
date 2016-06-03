@@ -23,11 +23,9 @@ procedimento quickSort(ref inteiro vetor, inteiro esquerdo, inteiro direito) {
     se (pivo+1 < direito) {
         quickSort(vetor, pivo+1, direito);
     }
-
-
 }
 
-principal {
+principal() {
     inteiro[10] vetor;
     vetor[0] = 5;
     vetor[1] = 7;
