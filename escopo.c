@@ -13,7 +13,7 @@ escopo_variaveis_t *cria_escopo(escopo_variaveis_t *escopo_atual) {
         }
     } else {
         escopo_variaveis_t *novo_escopo = (escopo_variaveis_t*) malloc(sizeof(escopo_variaveis_t));
-        novo_escopo->hash_variaveis = (hash_variaveis_t*) malloc(sizeof(hash_variaveis_t));
+        novo_escopo->hash_variaveis = criar_hash_variaveis(TAMANHO_HASH);
         novo_escopo->anterior = escopo_atual;
         return novo_escopo;
     }
@@ -49,7 +49,6 @@ variavel_t *consulta_escopos(escopo_variaveis_t *escopo_atual, char *id) {
 variavel_t *consulta_escopo_atual(escopo_variaveis_t *escopo_atual, char *id) {
     if (escopo_atual != NULL) {
         hash_variaveis_t *hash_variaveis_escopo_atual = escopo_atual->hash_variaveis;
-
         variavel_t *variavel_encontrada =  busca_variavel(hash_variaveis_escopo_atual, id);
         return variavel_encontrada;
     } else {

@@ -3,7 +3,7 @@
 # ================== COMPILACAO ==================
 flex oxegol.l
 yacc -d -v oxegol.y
-cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
+cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe -g
 
 # ============= EXECUCAO DE EXEMPLOS =============
 # echo '===== Quicksort ====='
@@ -24,15 +24,15 @@ cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
 # echo '===== Deslocamento ====='
 # ./programa.oxe exemplos/deslocamento.oxe
 
-echo '===== Teste Simples ====='
-./programa.oxe exemplos/testesimples.oxe
+# echo '===== Teste Simples ====='
+# ./programa.oxe exemplos/testesimples.oxe
 
 # =================== LIMPEZA ===================
 rm lex.yy.c
 rm y.output
 rm y.tab.c
 rm y.tab.h
-rm programa.oxe
+# rm programa.oxe
 
 # =================== TESTES ===================
 # echo '===== Hash ====='

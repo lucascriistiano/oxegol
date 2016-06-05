@@ -1,53 +1,9 @@
-OK - Criar uma variável escopo no YACC
-OK - Criar uma lista encadeada de tabelas hash
-OK - Para cada { incrementar a variável escopo e criar uma nova entrada na lista de tabelas
-OK - Para cada } decrementar a variável escopo e remover uma entrada da lista de tabelas
-OK - FOpen e FClose no YACC
+- Desalocar nós inferiores quando criar um nó com o conteúdo dele em um nível superior
+- Verificar se algum ponteiro para próximo não é inicializado com NULL
+- Verificar limites do array
+    - Verificar na hora da compilação e de execução
+- Gerar instrução
 
-Atual:
-- Para cada operação, verificar os tipos
-- Verificar na comparação de tipos se os próximos operadores são do mesmo tipo do primeiro
-
-- Verificar se é possível fazer cast entre os tipos inseridos (do atual para o destino)
-- Para cada declaração, escrever na tabela a variável
-- Na tabela hash, buscar variável e se já existir reclamar (não substituir, como está atualmente)
-- Repetir os passos acima para as declarações de funções e procedimentos
-- Verificar se os tipos das expressões do PARA são aritméticas
-
-
-- Dar malloc nos nós criados
-- Corrigir retorno do tipo registro na regra "tipo" no Yacc
-- Apagar todos os escopos no final
-
-- Criar Hash para funções/ (armazena id, tipo de retorno, número de parâmetros, lista de parâmetros recebidos - como vetor alocado com o número de parâmetros)
-
-- Gerar código C
-    - Principal
-    - Funcao
-    - Procedimento
-    - Imprima
-    - Leia
-    - Compara texto
-    - Concatena texto
-    - Exportar para arquivo
-
-- Descobrir como corrigir as mensagens de erro (mensagens mais significativas, número da linha)
-    http://stackoverflow.com/questions/16443056/yylineno-has-always-the-same-value-in-yacc-file
-
-- Apagar variáveis locais e argumentos de um escopo anterior (de mesmo nível)
-- Integrar tabela hash integrada com o reconhecimento de tipos
-
-- Primeiro colocar o id na Hash e depois consultar se tipos se os tipos são compatíveis
-
-erros:
-- [] em parâmetros
-- regra de parênteses em expressões
-- Verificar precedência de operadores
-
-obs:
-- todos os [] estão com valor dentro
-- Não usa a mesma palavra para acessar e criar registro
-- Sem acentuacao
-- sem campos de registro junto com []
-- Falta adicionar conversão explícita de tipos
-- Import de libs
+- Imprimir include no início do arquivo C
+- Criar nó retorno (com tipo do retorno e código)
+- Retornar tipo e codigo do

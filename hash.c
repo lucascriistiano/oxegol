@@ -25,6 +25,7 @@ hash_variaveis_t *criar_hash_variaveis(int tamanho) {
     }
 
     tabela_hash->tamanho = tamanho;
+
     return tabela_hash;
 }
 
@@ -214,7 +215,6 @@ int funcao_hash_subprogramas(hash_subprogramas_t *tabela_hash, char *id) {
 }
 
 subprograma_t *criar_novo_subprograma(char *id, tipo_t retorno, no_parametro_t *parametros) {
-    printf("Criando novo subprograma\n");
     subprograma_t *novo_subprograma;
     if((novo_subprograma = malloc(sizeof(subprograma_t))) == NULL) {
         return NULL;
