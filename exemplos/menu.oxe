@@ -1,6 +1,6 @@
 //1 - soma 2 - subtrai 3- sair
 
-principal {
+principal() {
     inteiro op;
     inteiro a, b;
     leia(a);

@@ -1,17 +1,14 @@
-principal {
-    //inteiro a = "Teste";
-    //inteiro b = 2 + "kkkk";
-    //booleano c = 3 < (2.6 + 1);
-    //booleano d = (((1 + 4) > 10) * 10) + 10; //Funciona mais ou menos
-    //booleano f = 10 * 3 + 2;
-    //real c = falso;
-    //booleano bool = verdadeiro;
+global:
+inteiro c = 2;
+real d = 2.5;
 
-    inteiro a = 2;
-    2++; //cai em instrucao
+funcao teste(inteiro a) -> inteiro {
+    inteiro b, c, d = 4;
+    inteiro asasdas = 4;
+    retorne 2;
+}
 
-    //++2;
-    //booleano b = verdadeiro;
-    //nao falso;
-
+principal() {
+    inteiro asasdas = 4;
+    inteiro asasdas = 4;
 }

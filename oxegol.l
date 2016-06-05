@@ -107,9 +107,10 @@ digitos [0-9]+
 
 [a-zA-Z][a-zA-Z0-9\_]* { yylval.id = strdup(yytext); return ID; }
 
-[ \n\t\r]+                      { /* Nao faz nada para espacos em branco */ }
-"/*"((\*+[^/*])|([^*]))*\**"*/" { /* Nao faz nada para comentarios multi linhas */ }
-[/][/].*                          { /* Nao faz nada para comentarios uma linha */ }
+\n                               { yylineno++; }
+[ \t\r]+                         { /* Nao faz nada para espacos em branco */ }
+"/*"((\*+[^/*])|([^*]))*\**"*/"  { /* Nao faz nada para comentarios multi linhas */ }
+[/][/].*                         { /* Nao faz nada para comentarios uma linha */ }
 
 .          { printf("Padrao desconhecido: %s\n", yytext); }
 

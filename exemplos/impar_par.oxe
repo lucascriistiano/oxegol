@@ -1,4 +1,4 @@
-principal {
+principal() {
     inteiro num;
     leia(num);
 
