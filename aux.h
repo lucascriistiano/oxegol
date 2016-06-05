@@ -17,11 +17,6 @@ typedef union valor_u {
   int   bval;  /* valor booleano - verdadeiro: 1; falso: 0; */
 } valor_t;
 
-// typedef struct codigo_tipo_s {
-//   char* codigo;
-//   tipo_t tipo;
-// } codigo_tipo_t;
-
 typedef struct variavel_s {
   char *id;
   tipo_t tipo;
@@ -80,7 +75,6 @@ typedef struct no_parametro_s {
   struct no_parametro_s *proximo; // Proximos parâmetros identificados
 } no_parametro_t;
 
-// codigo_tipo_t* criar_codigo_tipo(char* codigo, tipo_t tipo);
 // codigo_tipo_t* criar_codigo_tipo_cast(codigo_tipo_t* codigo_tipo, tipo_t tipo_destino);
 
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor);

@@ -1,12 +1,5 @@
 #include "aux.h"
 
-// codigo_tipo_t* criar_codigo_tipo(char* codigo, tipo_t tipo) {
-//     codigo_tipo_t* codigo_tipo = (codigo_tipo_t*) malloc(sizeof(codigo_tipo_t));
-//     codigo_tipo->codigo = strdup(codigo);
-//     codigo_tipo->tipo = tipo;
-//     return codigo_tipo;
-// }
-
 // codigo_tipo_t* criar_codigo_tipo_cast(codigo_tipo_t* codigo_tipo, tipo_t tipo_destino) {
 //     char* codigo_original = codigo_tipo->codigo;
 
@@ -65,7 +58,33 @@
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor) {
   no_literal_t* no = (no_literal_t*) malloc(sizeof(no_literal_t));
   no->tipo = tipo;
-  no->valor = valor;  //Criar cópia e desalocar quando for do tipo string?
+
+  switch(tipo) {
+    case inteiro:
+      no->valor.ival = valor.ival;
+      break;
+
+    case real:
+      no->valor.fval = valor.fval;
+      break;
+
+    case booleano:
+      no->valor.bval = valor.bval;
+      break;
+
+    case caractere:
+      no->valor.cval = valor.cval;
+
+    case string:
+      no->valor.sval = strdup(valor.sval);  //Criar cópia e desalocar quando for do tipo string
+      free(valor.sval);
+      break;
+
+    default:
+      printf("Tipo %u não reconhecido\n", tipo);
+      return NULL;
+  }
+
   return no;
 }
 
@@ -339,7 +358,7 @@ char* gerar_enquanto(int nenquanto, char* exp_parada, char*comandos) {
     retorno = concatenar_strings(retorno, "){\n");
     retorno = concatenar_strings(retorno, "goto ");
     retorno = concatenar_strings(retorno, label);
-    retorno = concatenar_strings(retorno, ";}");
+    retorno = concatenar_strings(retorno, ";\n}\n");
 
     free(label);
     return retorno;
@@ -480,7 +499,7 @@ char * gerar_principal(char* comandos_opc){
 	char* retorno = "int main(){\n";
 	retorno = concatenar_strings(retorno, comandos_opc);
 	retorno = concatenar_strings(retorno, "return 0;");
-	retorno = concatenar_strings(retorno, ")}\n");
+	retorno = concatenar_strings(retorno, "}\n");
     return retorno;
 }
 

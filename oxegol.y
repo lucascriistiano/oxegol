@@ -16,11 +16,16 @@
   escopo_variaveis_t *escopo_variaveis_atual;
   hash_subprogramas_t *hash_subprogramas;
 
+
+  int num_enquanto = 0;
+
+
   void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis);
   void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros);
   void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual, no_parametro_t* parametros);
   void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, no_expressao_t *argumentos);
   void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retornado);
+  char* converter_literal_para_string(no_literal_t* literal);
 %}
 
 %union {
@@ -76,13 +81,16 @@ secao_declaracoes_var: /* vazio */                        { $$ = ""; }
                      | GLOBAL DOIS_PONTOS declaracoes_var { $$ = $3; }
                      ;
 
-declaracoes_var: declaracao_var PONTO_E_VIRGULA                   { $$ = concatenar_strings($1, ";"); }
-               | declaracoes_var declaracao_var PONTO_E_VIRGULA   { char* declaracao_final = concatenar_strings($2, ";");
+declaracoes_var: declaracao_var PONTO_E_VIRGULA                   { $$ = concatenar_strings($1, ";\n"); }
+               | declaracoes_var declaracao_var PONTO_E_VIRGULA   { char* declaracao_final = concatenar_strings($2, ";\n");
                                                                     $$ = concatenar_strings($1, declaracao_final); //Deve dar free?
                                                                   }
                ;
 
-declaracao_var: tipo indices_array_opc var_declaradas { declarar_variaveis(escopo_variaveis_atual, $1, $2, $3); $$ = "declaracao"; /* $$ = gerar_declaracao($1, $2, $3); */ }
+declaracao_var: tipo indices_array_opc var_declaradas { declarar_variaveis(escopo_variaveis_atual, $1, $2, $3);
+                                                        $$ = "declaracao_var";
+                                                        /* $$ = gerar_declaracao($1, $2, $3); */
+                                                      }
               ;
 
 var_declaradas: id_atribuicao_opc                         { $$ = $1; }
@@ -155,7 +163,7 @@ comando: se                          { $$ = $1; }
        | para                        { $$ = $1; }
        | escolha                     { $$ = $1; }
        | enquanto                    { $$ = $1; }
-       | instrucao PONTO_E_VIRGULA   { $$ = concatenar_strings($1, ";"); }
+       | instrucao PONTO_E_VIRGULA   { $$ = concatenar_strings($1, ";\n"); }
        ;
 
 instrucao: PARE                                 { $$ = "break"; }
@@ -274,7 +282,7 @@ caso_opc: /* vazio */     { $$ = ""; }
 caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc   { /*gerar e retornar caso_contario*/ $$ = "caso_contrario"; }
               ;
 
-enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = "enquanto"; }
+enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { num_enquanto++; $$ = gerar_enquanto(num_enquanto, $3->codigo, $6); }
         ;
 
 retorne: RETORNE expressao PONTO_E_VIRGULA { char* codigo_retorne = concatenar_strings("return ", $2->codigo);
@@ -367,8 +375,19 @@ terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { if(verificar_cast($4
                      | terminal_exp                       { $$ = $1; }
                      ;
 
-terminal_exp: literal                              { /*Converter o literal para string*/ $$ = criar_no_expressao("literal", $1->tipo); }  //Retorna o tipo do nó literal
-            | ID                                   { $$ = criar_no_expressao("id", inteiro); }        //Só para testes, mudar para consultar na tabela a variável e retorna o seu tipo
+terminal_exp: literal                              { char* literal_em_string = converter_literal_para_string($1);
+                                                     $$ = criar_no_expressao(literal_em_string, $1->tipo);
+                                                   }
+            | ID                                   { variavel_t* variavel_encontrada;
+                                                     if((variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $1)) != NULL) {
+                                                       $$ = criar_no_expressao(variavel_encontrada->id, variavel_encontrada->tipo);
+                                                     } else {
+                                                       char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $1) + 1);
+                                                       sprintf(message, "Variável '%s' não declarada", $1);
+                                                       yyerror(message);
+                                                       $$ = criar_no_expressao($1, vazio); //Retorna variável com tipo vazio para variável não declarada
+                                                     }
+                                                   }
             | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); /* gerar e retornar string de chama de subproc */ $$ = criar_no_expressao("id(args)", inteiro); }  //Só para testes, mudar para consultar na tabela o procedimento/função e retorna o seu tipo de retorno
             | ID indices_array                     { $$ = criar_no_expressao("id[i][j]", inteiro); }  //Só para testes, mudar para consultar na tabela o array e retorna o seu tipo
             | ID campos_registro                   { $$ = criar_no_expressao("id.campo", inteiro); }  //Só para testes, mudar para consultar na tabela o campo do registro e retorna o seu tipo
@@ -417,9 +436,9 @@ void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo,
   while(no_variavel_atual != NULL) {
     variavel_t* variavel_encontrada = consulta_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id);
     if(variavel_encontrada == NULL) {
-      int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id, tipo, 0); //TODO Definir tamanho!!!
+      int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id, tipo, 0); //TODO Definir tamanho
       if(variavel_declarada == 0) {
-        printf("DECLAROU %s\n", no_variavel_atual->id);
+        printf("DECLAROU '%s'\n", no_variavel_atual->id);
       }
     } else {
       char* message = malloc(snprintf(NULL, 0, "Redefinição da variavel '%s'", variavel_encontrada->id) + 1);
@@ -457,7 +476,7 @@ void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual,
     while(no_parametro_atual != NULL) {
       variavel_t* variavel_encontrada = consulta_escopo_atual(escopo_variaveis_atual, no_parametro_atual->id);
       if(variavel_encontrada == NULL) {
-        int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_parametro_atual->id, no_parametro_atual->tipo, 0); //TODO Definir tamanho!!!
+        int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_parametro_atual->id, no_parametro_atual->tipo, 0); //TODO Definir tamanho
         if(variavel_declarada == 0) {
           printf("DECLAROU %s NO SUBPROGRAMA\n", no_parametro_atual->id);
         }
@@ -511,4 +530,40 @@ void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retor
     sprintf(message, "Tipo incorreto retornado na função '%s'", id);
     yyerror(message);
   }
+}
+
+char* converter_literal_para_string(no_literal_t* literal) {
+  tipo_t tipo_literal = literal->tipo;
+  char* literal_string;
+  switch(tipo_literal) {
+    case inteiro:
+      literal_string = malloc(snprintf(NULL, 0, "%d", literal->valor.ival) + 1);
+      sprintf(literal_string, "%d", literal->valor.ival);
+      break;
+
+    case real:
+      literal_string = malloc(snprintf(NULL, 0, "%f", literal->valor.fval) + 1);
+      sprintf(literal_string, "%f", literal->valor.fval);
+      break;
+
+    case booleano:
+      literal_string = malloc(snprintf(NULL, 0, "%d", literal->valor.bval) + 1);
+      sprintf(literal_string, "%d", literal->valor.bval);
+      break;
+
+    case caractere:
+      literal_string = malloc(snprintf(NULL, 0, "%c", literal->valor.cval) + 1);
+      sprintf(literal_string, "%c", literal->valor.cval);
+      break;
+
+    case string:
+      literal_string = malloc(snprintf(NULL, 0, "%s", literal->valor.sval) + 1);
+      sprintf(literal_string, "%s", literal->valor.sval);
+      break;
+
+    default:
+      printf("Tipo %u não reconhecido\n", tipo_literal);
+      return NULL;
+  }
+  return literal_string;
 }
