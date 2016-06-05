@@ -57,7 +57,7 @@ void apagar_hash_variaveis(hash_variaveis_t *tabela_hash) {
 }
 
 int funcao_hash_variaveis(hash_variaveis_t *tabela_hash, char *id) {
-    unsigned long int valor_hash;
+    unsigned long int valor_hash = 0;
     int i = 0;
 
     /* Converte nossa string para um inteiro */
@@ -201,7 +201,7 @@ void apagar_hash_subprogramas(hash_subprogramas_t *tabela_hash) {
 }
 
 int funcao_hash_subprogramas(hash_subprogramas_t *tabela_hash, char *id) {
-    unsigned long int valor_hash;
+    unsigned long int valor_hash = 0;
     int i = 0;
 
     /* Converte nossa string para um inteiro */

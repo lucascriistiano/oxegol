@@ -33,9 +33,7 @@ escopo_variaveis_t *apaga_escopo(escopo_variaveis_t *escopo_atual) {
 
 variavel_t *consulta_escopos(escopo_variaveis_t *escopo_atual, char *id) {
     if (escopo_atual != NULL) {
-        hash_variaveis_t *hash_variaveis_escopo_atual = escopo_atual->hash_variaveis;
-
-        variavel_t *variavel_encontrada =  busca_variavel(hash_variaveis_escopo_atual, id);
+        variavel_t *variavel_encontrada = busca_variavel(escopo_atual->hash_variaveis, id);
         if(variavel_encontrada == NULL) {
             return consulta_escopos(escopo_atual->anterior, id);
         } else {
@@ -49,9 +47,10 @@ variavel_t *consulta_escopos(escopo_variaveis_t *escopo_atual, char *id) {
 variavel_t *consulta_escopo_atual(escopo_variaveis_t *escopo_atual, char *id) {
     if (escopo_atual != NULL) {
         hash_variaveis_t *hash_variaveis_escopo_atual = escopo_atual->hash_variaveis;
-        variavel_t *variavel_encontrada =  busca_variavel(hash_variaveis_escopo_atual, id);
+        variavel_t *variavel_encontrada = busca_variavel(hash_variaveis_escopo_atual, id);
         return variavel_encontrada;
     } else {
+        printf("ESCOPO NULL\n");
         return NULL;
     }
 }

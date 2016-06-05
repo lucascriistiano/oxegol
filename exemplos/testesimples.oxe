@@ -1,12 +1,14 @@
 global:
 inteiro c = 2;
 real d = 2.5;
+inteiro g;
 
 funcao teste(inteiro a, booleano i) -> inteiro {
     inteiro b, c, d = 4;
+    inteiro f = h;
     inteiro asasdas = 4;
-    teste(1, verdadeiro);
-    retorne verdadeiro;
+    teste(100, verdadeiro);
+    retorne 10;
 }
 
 procedimento teste1() {
