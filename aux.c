@@ -574,9 +574,9 @@ char* gerar_imprima(char* argumentos){
 char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador  ){
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, lado_esquerdo);
-	retorno = concatenar_strings(retorno,  " ";
+	retorno = concatenar_strings(retorno,  " ");
 	retorno = concatenar_strings(retorno, operador);
-	retorno = concatenar_strings(retorno,  " ";
+	retorno = concatenar_strings(retorno,  " ");
 	retorno = concatenar_strings(retorno, lado_direito);
     return retorno;
 }
@@ -584,7 +584,7 @@ char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* ope
 char* gerar_expressao_unaria(char* lado_esquerdo, char* operador  ){
 	char* retorno = "(";
 	retorno = concatenar_strings(retorno, lado_esquerdo);
-	retorno = concatenar_strings(retorno,  " ";
+	retorno = concatenar_strings(retorno,  " ");
 	retorno = concatenar_strings(retorno, operador);
 	retorno = concatenar_strings(retorno, ")");
     return retorno;
