@@ -221,7 +221,7 @@ char* concatenar_strings(char* primeira, char* segunda) {
     return resultado;
 }
 
-char* gerar_concatena_texto(char* dstino,char* primeira, char* segunda){
+char* gerar_concatena_texto(char* destino,char* primeira, char* segunda){
     char *retorno = "";
     retorno = concatenar_strings(retorno, "sprintf(");
     retorno = concatenar_strings(retorno, destino);
@@ -231,9 +231,8 @@ char* gerar_concatena_texto(char* dstino,char* primeira, char* segunda){
     retorno = concatenar_strings(retorno, "primeira");
     retorno = concatenar_strings(retorno, ",");
     retorno = concatenar_strings(retorno, "segunda");
-     retorno = concatenar_strings(retorno, ");\n");
-
-
+    retorno = concatenar_strings(retorno, ");\n");
+    return retorno;
 }
 
 char* gerar_label(char* comando, int numero) {
@@ -371,8 +370,8 @@ char* gerar_se(int nse, se_t* ses) {
     char *labelocal = gerar_label("l", nlabel);
 
     char *retorno = "if(";
-    retorno = concatenar_strings(retorno, se_t->expressao);
-    char *retorno = "){\n";
+    retorno = concatenar_strings(retorno, ses->expressao);
+    retorno = concatenar_strings(retorno, "){\n");
     retorno = concatenar_strings(retorno, "goto ");
     retorno = concatenar_strings(retorno, label);
     retorno = concatenar_strings(retorno, labelocal);
@@ -406,7 +405,7 @@ char* gerar_se(int nse, se_t* ses) {
     retorno = concatenar_strings(retorno, label);
     retorno = concatenar_strings(retorno, labelocal);
     retorno = concatenar_strings(retorno, ":\n");
-    retorno = concatenar_strings(retorno, se->comandos);
+    retorno = concatenar_strings(retorno, se_atual->comandos);
     retorno = concatenar_strings(retorno, "\n goto exit");
     retorno = concatenar_strings(retorno, label);
     retorno = concatenar_strings(retorno, ";\n");
@@ -437,7 +436,7 @@ char* gerar_se(int nse, se_t* ses) {
     retorno = concatenar_strings(retorno, "\n exit");
     retorno = concatenar_strings(retorno, label);
     retorno = concatenar_strings(retorno, ":\n");
-
+    return retorno;
 }
 
 char* gerar_funcao(char* id, char* parametros_opc, char* tipo, char* comandos_opc) {
@@ -455,7 +454,7 @@ char* gerar_funcao(char* id, char* parametros_opc, char* tipo, char* comandos_op
 	return retorno;
 }
 
-char * gerar_procedimento( char* id, char* parametros_opc, char* comandos_opc){
+char* gerar_procedimento(char* id, char* parametros_opc, char* comandos_opc) {
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, "void");
 	retorno = concatenar_strings(retorno, " ");
@@ -467,6 +466,7 @@ char * gerar_procedimento( char* id, char* parametros_opc, char* comandos_opc){
 	retorno = concatenar_strings(retorno, comandos_opc);
 
 	retorno = concatenar_strings(retorno, ")}\n");
+    return retorno;
 }
 
 char * gerar_principal(char* comandos_opc){
@@ -474,9 +474,10 @@ char * gerar_principal(char* comandos_opc){
 	retorno = concatenar_strings(retorno, comandos_opc);
 	retorno = concatenar_strings(retorno, "return 0;");
 	retorno = concatenar_strings(retorno, ")}\n");
+    return retorno;
 }
 
-int escrever_arquivoc(char *codigo){
+int escrever_arquivo_c(char *codigo){
     FILE *fp;
     fp = fopen ("temporario.c", "a");
     if (fp == NULL) {
@@ -499,11 +500,17 @@ int escrever_arquivoc(char *codigo){
 }
 
 char* gerar_comparar_char(char primeira, char segunda){
+    char* primeira_str = (char*) malloc(2 * sizeof(char));  //Dar free?
+    char* segunda_str = (char*) malloc(2 * sizeof(char));  //Dar free?
+
+    sprintf(primeira_str, "%c", primeira);
+    sprintf(segunda_str, "%c", segunda);
+
     char* retorno = "";
     retorno = concatenar_strings(retorno, "(");
-    retorno = concatenar_strings(retorno,primeira);
+    retorno = concatenar_strings(retorno,primeira_str);
     retorno = concatenar_strings(retorno,"==");
-    retorno = concatenar_strings(retorno,segunda);
+    retorno = concatenar_strings(retorno,segunda_str);
     retorno = concatenar_strings(retorno, ")");
     return retorno;
 }
@@ -530,12 +537,13 @@ char* gerar_imprima(char* argumentos){
     return retorno;
 }
 
-char * gerar_atribuicao(char* lado_esquerdo, char* lado_direito ){
+char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito ){
 	char* retorno = "";
-	retorno = concatenar_strings(retorno, lado_esquerto);
+	retorno = concatenar_strings(retorno, lado_esquerdo);
 	retorno = concatenar_strings(retorno, " = ");
-	retorno = concatenar_strings(retorno, "lado_direito");
+	retorno = concatenar_strings(retorno, lado_direito);
 	retorno = concatenar_strings(retorno, ";");
+    return retorno;
 }
 
 char * gerar_declaracao_sa(char* tipo, char* variavel ){
@@ -543,6 +551,7 @@ char * gerar_declaracao_sa(char* tipo, char* variavel ){
 	retorno = concatenar_strings(retorno, tipo);
 	retorno = concatenar_strings(retorno, variavel);
 	retorno = concatenar_strings(retorno, ";");
+    return retorno;
 }
 
 char * gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao  ){
@@ -551,6 +560,7 @@ char * gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao  ){
 	retorno = concatenar_strings(retorno, variavel);
 	retorno = gerar_atribuicao(retorno, inicializacao);
 	retorno = concatenar_strings(retorno, ";");
+    return retorno;
 }
 
 se_t* criar_se(char* exp, char* comandos){
@@ -558,6 +568,7 @@ se_t* criar_se(char* exp, char* comandos){
     se->expressao = exp;
     se->comandos = comandos;
     se->proximo = NULL;
+    return se;
 }
 
 void adicionar_se(se_t* se, char* exp, char* comandos) {

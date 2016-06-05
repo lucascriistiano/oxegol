@@ -13,9 +13,9 @@ int main() {
 
     char *se = gerar_se("30+20 > 10", "<comandos>", "<senao>");
     printf("\n\n%s", se);
-    
-    escrever_arquivoc(para);
-    escrever_arquivoc(se);
+
+    escrever_arquivo_c(para);
+    escrever_arquivo_c(se);
 
     return 0;
 }

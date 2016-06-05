@@ -66,7 +66,7 @@
 %type<parametros> parametros_opc parametros parametro
 %%
 
-programa: secao_declaracoes_var { printf("%s\n", $1); /* escrever_arquivoc($1); */ } secao_declaracoes_adicionais { printf("%s\n", $3); /* escrever_arquivoc($3); */ } principal { printf("%s\n", $5); /* escrever_arquivoc($5); */ }
+programa: secao_declaracoes_var { escrever_arquivo_c($1); } secao_declaracoes_adicionais { escrever_arquivo_c($3); } principal { printf("%s\n", $5); escrever_arquivo_c($5); }
         ;
 
 secao_declaracoes_var: /* vazio */                        { $$ = ""; }
@@ -393,7 +393,7 @@ int main (int argc, char *argv[]) {
           yyin = file;
           yylineno = 1;
           yyparse();
-          // system("./compilaEApaga");
+          system("./compilaEApaga.sh");
         }
 
         fclose(file);

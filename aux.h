@@ -106,7 +106,16 @@ int verificar_cast(tipo_t tipo_origem, tipo_t tipo_destino);
 
 char* concatenar_strings(char* primeira, char* segunda);
 char* gerar_label(char* comando, int numero);
-int escrever_arquivoc(char *codigo);
+int escrever_arquivo_c(char* codigo);
+
+typedef struct se_s {
+    char *expressao;
+    char *comandos;
+    struct se_s *proximo;
+} se_t;
+
+se_t* criar_se(char* exp, char* comandos);
+void adicionar_se(se_t* se, char* exp, char* comandos);
 
 char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada, char* comandos);
 char* gerar_enquanto(int nenquanto, char* exp_parada, char*comandos);
@@ -125,14 +134,5 @@ char * gerar_atribuicao(char* lado_esquerdo, char* lado_direito );
 char* gerar_imprima(char* argumentos);
 char* gerar_leia(char* id, char* tipo);
 char* gerar_concatena_texto(char* dstino,char* primeira, char* segunda);
-
-typedef struct se_s {
-    char *expressao;
-    char *comandos;
-    struct se_s *proximo;
-} se_t;
-
-se_t* criar_se(char* exp, char* comandos);
-void adicionar_se(se_t* se, char* exp, char* comandos);
 
 #endif
