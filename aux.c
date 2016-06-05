@@ -481,6 +481,7 @@ char * gerar_principal(char* comandos_opc){
 	retorno = concatenar_strings(retorno, comandos_opc);
 	retorno = concatenar_strings(retorno, "return 0;");
 	retorno = concatenar_strings(retorno, ")}\n");
+	//escrever_arquivo_c(retorno);
     return retorno;
 }
 
@@ -551,12 +552,32 @@ char* gerar_imprima(char* argumentos){
     return retorno;
 }
 
+
+char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador  ){
+	char* retorno = "";
+	retorno = concatenar_strings(retorno, lado_esquerdo);
+	retorno = concatenar_strings(retorno,  " ";
+	retorno = concatenar_strings(retorno, operador);
+	retorno = concatenar_strings(retorno,  " ";
+	retorno = concatenar_strings(retorno, lado_direito);
+    return retorno;
+}
+
+char* gerar_expressao_unaria(char* lado_esquerdo, char* operador  ){
+	char* retorno = "(";
+	retorno = concatenar_strings(retorno, lado_esquerdo);
+	retorno = concatenar_strings(retorno,  " ";
+	retorno = concatenar_strings(retorno, operador);
+	retorno = concatenar_strings(retorno, ")");
+    return retorno;
+}
+
 char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito ){
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, lado_esquerdo);
 	retorno = concatenar_strings(retorno, " = ");
 	retorno = concatenar_strings(retorno, lado_direito);
-	retorno = concatenar_strings(retorno, ";");
+	retorno = concatenar_strings(retorno, ";\n");
     return retorno;
 }
 

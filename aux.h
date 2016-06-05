@@ -137,5 +137,7 @@ char* gerar_imprima(char* argumentos);
 char* gerar_leia(char* id, char* tipo);
 char* gerar_concatena_texto(char* destino,char* primeira, char* segunda);
 char* gerar_includes();
+char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador);
+char* gerar_expressao_unaria(char* lado_esquerdo, char* operador);
 
 #endif

@@ -1,4 +1,16 @@
 //1 - soma 2 - subtrai 3- sair
+procedimento somar(inteiro a, inteiro b){
+    resultado = a+b;
+    imprima(resultado);
+  
+}
+
+procedimento subtrair(inteiro a, inteiro b){
+    resultado = a-b;
+    imprima(resultado);
+  
+}
+
 
 principal() {
     inteiro op;
