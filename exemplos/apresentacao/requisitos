@@ -22,11 +22,11 @@ Programas a Implementar para Avaliação:
 (1) Apenas programas escritos na linguagem do grupo e traduzidos por seu compilador para C reduzido serão aceitos.
 
 (2) Programas não-recursivos (implementar antes da avaliação):
-  (A) Leitura de valores (envolvendo tipos distintos), avaliação de expressões, atribuições e escrita em tela.
-  (B) Busca de um elemento k em um vetor contendo n elementos.
-  (C) Leitura de duas matrizes A e B, cálculo e impressão da matriz C = A * B.
-  (D) Criação e uso de módulos para cálculo das operações aritméticas (binárias) elementares.
+  OK(A) Leitura de valores (envolvendo tipos distintos), avaliação de expressões, atribuições e escrita em tela.
+  OK(B) Busca de um elemento k em um vetor contendo n elementos.
+  OK(C) Leitura de duas matrizes A e B, cálculo e impressão da matriz C = A * B.
+  OK(D) Criação e uso de módulos para cálculo das operações aritméticas (binárias) elementares.
 
 (3) Programas recursivos (implementar antes da avaliação):
-  (A) Fatorial.
-  (B) Fibonacci.
+  OK(A) Fatorial.
+  OK(B) Fibonacci.

@@ -1,0 +1,22 @@
+funcao fibonacci(inteiro numero) -> inteiro {
+    se(numero == 0){
+        retorne 0;
+    }
+    senao se(numero==1){
+        retorne 1;
+    }
+    senao se(numero > 1){
+        retorne fibonacci(numero -1) + fibonacci(numero-2);
+    }
+}
+
+principal(){
+    inteiro numero, contador;
+    imprima("Digite um valor para a sequencia de Fobonacci:");
+    leia(numero);
+    imprima("A sequencia eh:");
+    
+    para (contador de 0 ate numero) {
+        imprima(fibonacci(contador+1));
+    }
+}

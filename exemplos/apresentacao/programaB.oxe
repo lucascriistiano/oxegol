@@ -1,0 +1,67 @@
+procedimento quickSort(ref inteiro vetor, inteiro esquerdo, inteiro direito) {
+    inteiro pivo = esquerdo;
+    inteiro i, ch, j;
+
+    para (i de esquerdo+1 ate direito) {
+        j = i;
+
+        se (vetor[j] < vetor[pivo]) {
+            ch = vetor[j];
+            enquanto (j > pivo) {
+                vetor[j] = vet[j-1];
+                j--;
+            }
+            vetor[j] = ch;
+            pivo++;
+        }
+    }
+
+    se (pivo-1 > esquerdo) {
+        quickSort(vetor, esquerdo, pivo-1);
+    }
+
+    se (pivo+1 < direito) {
+        quickSort(vetor, pivo+1, direito);
+    }
+}
+
+procedimento busca(ref inteiro vetor, inteiro tamanho, inteiro elemento) {
+    inteiro inicio = 0;
+    inteiro fim = tamanho - 1;
+
+    enquanto (inicio <= fim) {
+    	inteiro meio = (inicio + fim) / 2;
+    	se(elemento < vetor[meio]){
+    		fim = meio -1;
+    	}
+    	senao se(elemento > vetor[meio]){
+    		inicio = meio + 1;
+    	}
+    	senao {
+    		retorne meio;
+    	}
+    	retorne -1;
+}
+
+
+principal (){
+	inteiro tamanho;
+	imprima("Digite o tamanho do seu vetor:");
+	leia(tamanho);
+
+    inteiro[tamanho] vetor;
+
+    inteiro cont;
+    inteiro aux;
+    para(cont de 0 ate tamanho){
+    	leia(aux);
+    	vetor[cont] = aux;
+    }
+
+    inteiro elemento;
+    imprima("Qual elemento você busca nesse vetor?:")
+    leia(elemento);
+    
+    quickSort(vetor, vetor[0], vetor[tamanho - 1]);
+    buca(vetor,tamanho,elemento);
+}

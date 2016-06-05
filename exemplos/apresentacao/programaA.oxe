@@ -1,0 +1,30 @@
+principal() {
+    
+    inteiro i;
+    real r;
+    booleano b;
+    string s;
+    caractere c;
+    
+    imprima("Digite um numero inteiro:");
+    leia(i);
+    imprima("Digite um numero real:");
+    leia(r);
+    imprima("Digite um valor booleano: vedaderio ou falso");
+    leia(b);
+    imprima("Digite uma palavra:");
+    leia(s);
+    imprima("Digite um caractere:");
+    leia(c);
+    
+    imprima("Seu numero inteiro eh:");
+    imprima(i);
+    imprima("Seu numero real eh:");
+    imprima(r);
+    imprima("Seu valor booleano eh:");
+    imprima(b);
+    imprima("Sua palavra eh:");
+    imprima(s);
+    imprima("Seu caractere eh:");
+    imprima(c);
+}

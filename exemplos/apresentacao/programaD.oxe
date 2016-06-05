@@ -1,0 +1,43 @@
+principal(){
+    real numA, numB;
+    caractere operador;
+    
+    imprima("Operadores permitidos");
+    imprima("+: soma");
+    imprima("-: subtracao");
+    imprima("*: multiplicacao");
+    imprima("/: divisao");
+    imprima("%: modulo");
+    
+    imprima("Digite a sua operacao na forma: valor1 operacao valor2");
+    
+    leia(numA);
+    leia(operacao);
+    leia(numB);
+    
+    escolha(operacao) {
+        caso '+':
+            imprima("Resultado:");
+            imprima(numA + numB);
+            pare;
+        caso '-':
+            imprima("Resultado:");
+            imprima(numA - numB);
+            pare;
+        caso '*':
+            imprima("Resultado:");
+            imprima(numA * numB);
+            pare;
+        caso '/':
+            imprima(numA / numB);
+            pare;    
+        caso '%':
+            imprima("Resultado:");
+            imprima(numA % numB);
+            pare;
+        casocontrario:
+            imprima("Comando invalido");
+            pare;
+    }
+    
+}
