@@ -1,9 +1,9 @@
+#include "hash.h"
+
 /*
   Código adaptado do github : https://gist.github.com/tonious/1377667
 */
 #define _XOPEN_SOURCE 500 /* Enable certain library functions (strdup) on linux.  See feature_test_macros(7) */
-
-#include "hash.h"
 
 hash_variaveis_t *criar_hash_variaveis(int tamanho) {
     hash_variaveis_t *tabela_hash = NULL;
