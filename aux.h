@@ -22,6 +22,12 @@ typedef struct {
   valor_t valor;
 } no_literal_t;
 
+typedef struct se_s {
+    char *expressao;
+    char *comandos;
+    struct se_s *proximo;
+} se_t;
+
 typedef struct variavel_s {
     char *chave;
     tipo_t tipo;
@@ -47,6 +53,9 @@ typedef struct no_operador_s {
   struct no_operador_s *proximo; // Proximas informações de tipos aceitos e retorno do operador
 } no_operador_t;
 
+se_t* criar_se(char* exp, char* comandos);
+void adicionar_se(se_t* se, char* exp, char* comandos);
+
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor);
 no_variavel_t* criar_no_variavel(tipo_t tipo, valor_t valor);
 no_operador_t* criar_no_operador(tipo_t tipo, tipo_t retorno, int num_op);
@@ -61,11 +70,24 @@ void adicionar_tipo(no_operador_t* operador, tipo_t tipo, tipo_t retorno, int nu
 
 char* concatenar_strings(char* primeira, char* segunda);
 char* gerar_label(char* comando, int numero);
+int escrever_arquivoc(char *codigo);
+
 char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada, char* comandos);
 char* gerar_enquanto(int nenquanto, char* exp_parada, char*comandos);
 char* gerar_escolha(char* id, char*  caso_um_mais, char* caso_contrario);
 char* gerar_caso(char* valor, char*  comandos);
 char* gerar_caso_contrario(char*  comandos);
-char* gerar_se(char* exp, char* comandos, char* senao_opc, char* comandos_senao);
+char* gerar_se(int nse, se_t* ses);
+char* gerar_comparar_char(char primeira, char segunda);
+char* gerar_comparar_strings( char* primeira, char* segunda);
+char * gerar_principal(char* comandos_opc);
+char * gerar_procedimento( char* id, char* parametros_opc, char* comandos_opc);
+char* gerar_funcao(char* id, char* parametros_opc, char* tipo, char* comandos_opc);
+char * gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao);
+char * gerar_declaracao_sa(char* tipo, char* variavel);
+char * gerar_atribuicao(char* lado_esquerdo, char* lado_direito );
+char* gerar_imprima(char* argumentos);
+char* gerar_leia(char* id, char* tipo);
+char* gerar_concatena_texto(char* dstino,char* primeira, char* segunda);
 
 #endif

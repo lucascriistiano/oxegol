@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # ================== COMPILACAO ==================
-flex oxegol.l
-yacc -d -v oxegol.y
-cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
+# # flex oxegol.l
+# yacc -d -v oxegol.y
+# cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
 
 # ============= EXECUCAO DE EXEMPLOS =============
 # echo '===== Quicksort ====='
@@ -24,15 +24,15 @@ cc lex.yy.c y.tab.c hash.c escopo.c aux.c -o programa.oxe
 # echo '===== Deslocamento ====='
 # ./programa.oxe exemplos/deslocamento.oxe
 
-echo '===== Teste Simples ====='
-./programa.oxe exemplos/testesimples.oxe
+# echo '===== Teste Simples ====='
+# ./programa.oxe exemplos/testesimples.oxe
 
 # =================== LIMPEZA ===================
-rm lex.yy.c
-rm y.output
-rm y.tab.c
-rm y.tab.h
-rm programa.oxe
+# rm lex.yy.c
+# rm y.output
+# rm y.tab.c
+# rm y.tab.h
+# rm programa.oxe
 
 # =================== TESTES ===================
 # echo '===== Hash ====='
@@ -40,7 +40,7 @@ rm programa.oxe
 # ./testeHash
 # rm testeHash
 
-# echo '===== Gerar Instrucoes ====='
-# cc testeGeraInstrucao.c hash.c -o testeGeraInstrucao
-# ./testeGeraInstrucao
-# rm testeGeraInstrucao
+ echo '===== Gerar Instrucoes ====='
+ cc testeGeraInstrucao.c hash.c aux.c -o testeGeraInstrucao
+ ./testeGeraInstrucao
+ rm testeGeraInstrucao

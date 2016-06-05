@@ -11,8 +11,11 @@ int main() {
     char *enquanto = gerar_enquanto(12, "30>a", "<comandos>");
     printf("\n\n%s", enquanto);
 
-    char *se = gerar_se("30+20 > 10", "<comandos>", "", "<comandos_senao>");
+    char *se = gerar_se("30+20 > 10", "<comandos>", "<senao>");
     printf("\n\n%s", se);
+    
+    escrever_arquivoc(para);
+    escrever_arquivoc(se);
 
     return 0;
 }
