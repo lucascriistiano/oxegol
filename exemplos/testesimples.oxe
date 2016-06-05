@@ -2,13 +2,19 @@ global:
 inteiro c = 2;
 real d = 2.5;
 
-funcao teste(inteiro a) -> inteiro {
+funcao teste(inteiro a, booleano i) -> inteiro {
     inteiro b, c, d = 4;
     inteiro asasdas = 4;
-    retorne 2;
+    teste(1, verdadeiro);
+    retorne verdadeiro;
+}
+
+procedimento teste1() {
+
 }
 
 principal() {
     inteiro asasdas = 4;
-    inteiro asasdas = 4;
+    //inteiro asasdas = 4;
+    teste(1, verdadeiro);
 }

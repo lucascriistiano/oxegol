@@ -7,3 +7,5 @@
 - Imprimir include no início do arquivo C
 - Criar nó retorno (com tipo do retorno e código)
 - Retornar tipo e codigo do
+
+- Resolver itens marcados como "TODO" no código

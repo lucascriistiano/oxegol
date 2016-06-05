@@ -1,7 +1,7 @@
 #include "escopo.h"
 
 escopo_variaveis_t *cria_escopo(escopo_variaveis_t *escopo_atual) {
-    printf("Criando hashs do escopo\n");
+    // printf("Criando hashs do escopo\n");
     if (escopo_atual == NULL) {
         if ((escopo_atual = (escopo_variaveis_t*) malloc(sizeof(escopo_variaveis_t))) != NULL) {
             escopo_atual->hash_variaveis = criar_hash_variaveis(TAMANHO_HASH);
@@ -20,7 +20,7 @@ escopo_variaveis_t *cria_escopo(escopo_variaveis_t *escopo_atual) {
 }
 
 escopo_variaveis_t *apaga_escopo(escopo_variaveis_t *escopo_atual) {
-    printf("Apagando hashs do escopo\n");
+    // printf("Apagando hashs do escopo\n");
     if(escopo_atual != NULL) {
         escopo_variaveis_t *escopo_anterior = escopo_atual->anterior;
         apagar_hash_variaveis(escopo_atual->hash_variaveis);

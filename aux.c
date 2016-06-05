@@ -77,6 +77,15 @@ no_expressao_t* criar_no_expressao(char* codigo, tipo_t tipo) {
     return no_expressao;
 }
 
+no_expressao_t* adicionar_no_expressao(no_expressao_t* no_expressao, no_expressao_t* nova_expressao) {
+    no_expressao_t* expressao_atual = no_expressao;
+    while(expressao_atual->proximo != NULL) {
+        expressao_atual = expressao_atual->proximo;
+    }
+    expressao_atual->proximo = nova_expressao;
+    return no_expressao;
+}
+
 no_variavel_t* criar_no_variavel(char* id, char* codigo, tipo_t tipo) {
     no_variavel_t* no_variavel = (no_variavel_t*) malloc(sizeof(no_variavel_t));
     no_variavel->id = strdup(id);  //Criar cópia e desalocar quando for do tipo string?
@@ -113,12 +122,10 @@ no_parametro_t* criar_no_parametro(char *id, tipo_t tipo) {
 }
 
 no_variavel_t* adicionar_no_variavel(no_variavel_t* no_variavel, no_variavel_t* nova_variavel) {
-    //Navega até a última posição
     no_variavel_t* variavel_atual = no_variavel;
     while(variavel_atual->proximo != NULL) {
         variavel_atual = variavel_atual->proximo;
     }
-
     variavel_atual->proximo = nova_variavel;
     return no_variavel;
 }
@@ -490,12 +497,19 @@ int escrever_arquivo_c(char *codigo){
     return 0;
 }
 
- char* gerar_comparar_strings( char* primeira, char* segunda){
+char* gerar_comparar_strings( char* primeira, char* segunda) {
     char *retorno = "strcmp(";
     retorno = concatenar_strings(retorno,primeira);
     retorno = concatenar_strings(retorno,",");
     retorno = concatenar_strings(retorno,segunda);
     retorno = concatenar_strings(retorno, ")");
+    return retorno;
+}
+
+char* gerar_includes() {
+    char *retorno = "#include <stdio.h>\n";
+    retorno = concatenar_strings(retorno,"#include <stlib.h>\n");
+    retorno = concatenar_strings(retorno,"#include <string.h>\n\n");
     return retorno;
 }
 

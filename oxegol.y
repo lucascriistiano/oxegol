@@ -18,10 +18,13 @@
 
   void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis);
   void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros);
+  void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual, no_parametro_t* parametros);
+  void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, no_expressao_t *argumentos);
+  void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retornado);
 %}
 
 %union {
-  char* id;  /* id value */
+  char* id;
 
   char* codigo;
   tipo_t tipo;
@@ -58,7 +61,7 @@
 %type<valor> LITERAL_INTEIRO LITERAL_REAL LITERAL_BOOLEANO LITERAL_STRING LITERAL_CARACTERE
 
 %type<literal> literal
-%type<expressao> expressao terminal_exp terminal_exp_cast_opc atribuicao atribuicao_opc argumentos argumentos_opc
+%type<expressao> expressao terminal_exp terminal_exp_cast_opc atribuicao atribuicao_opc argumentos argumentos_opc retorne
 
 %type<variaveis> var_declaradas id_atribuicao_opc
 %type<indices_array> indices_array_opc indices_array array
@@ -66,7 +69,7 @@
 %type<parametros> parametros_opc parametros parametro
 %%
 
-programa: secao_declaracoes_var { escrever_arquivo_c($1); } secao_declaracoes_adicionais { escrever_arquivo_c($3); } principal { printf("%s\n", $5); escrever_arquivo_c($5); }
+programa: { char* includes = gerar_includes(); escrever_arquivo_c(includes); } secao_declaracoes_var { escrever_arquivo_c($2); } secao_declaracoes_adicionais { escrever_arquivo_c($4); } principal { escrever_arquivo_c($6); }
         ;
 
 secao_declaracoes_var: /* vazio */                        { $$ = ""; }
@@ -141,7 +144,7 @@ declaracao: declaracao_registro  { $$ = $1; }
           | declaracao_proc      { $$ = $1; }
           ;
 
-principal: PRINCIPAL PAR_ESQ PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = "principal"; /* $$ = gerar_principal($5); */ }
+principal: PRINCIPAL PAR_ESQ PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = gerar_principal($5); }
          ;
 
 comandos_opc: /* vazio */           { $$ = ""; }
@@ -174,7 +177,7 @@ instrucao: PARE                                 { $$ = "break"; }
                                                     yyerror("Tipo não suportado");
                                                   }
                                                 }
-         | ID PAR_ESQ argumentos_opc PAR_DIR    { /*verificar existência e parâmetros de subproc*/  /* gerar e retornar string de chama de subproc */ $$ = "instSubprograma(argumentos)"; }
+         | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); /* gerar e retornar string de chamada de subproc */ $$ = "instSubprograma(argumentos)"; }
          | ID campos_registro atribuicao        { /* gerar e retornar string de atribuicao a registro */ $$ = "registro.campo = valor"; }
          | IMPRIMA PAR_ESQ argumentos PAR_DIR   { /* gerar e retornar string do comando do imprima */ $$ = "imprima"; }
          | LEIA PAR_ESQ ID PAR_DIR              { /* gerar e retornar string do comando do leia */ $$ = "leia"; }
@@ -191,10 +194,10 @@ decremento: DECREMENTO  { no_operador_t* operadores = criar_no_operador("--", in
 campos_registro: PONTO ID
                | campos_registro PONTO ID
 
-declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { declarar_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { /* jogar variaveis na tabela de variaveis */  } comandos_opc retorne { /* verificar se o retorno é do tipo da função */ } fechamento_bloco { $$ = "declaracao_funcao"; /* gera e joga código pra cima */ }
+declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { declarar_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc retorne { verificar_retorno_funcao($2, $7, $12->tipo); } fechamento_bloco { $$ = "declaracao_funcao"; /* gera e joga código pra cima */ }
                ;
 
-declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { declarar_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { /* jogar variaveis na tabela de variaveis */  } comandos_opc fechamento_bloco { $$ = "declaracao_proc"; /* gera e joga código pra cima */ }
+declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { declarar_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc fechamento_bloco { $$ = "declaracao_proc"; /* gera e joga código pra cima */ }
                ;
 
 declaracao_registro: REGISTRO ID abertura_bloco campo_um_mais fechamento_bloco { $$ = "declaracao_registro"; }
@@ -274,7 +277,10 @@ caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc   { /*gerar e retornar ca
 enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = "enquanto"; }
         ;
 
-retorne: RETORNE expressao PONTO_E_VIRGULA { /* Gerar codigo do retorno e retorna o tipo e o código dele */ }
+retorne: RETORNE expressao PONTO_E_VIRGULA { char* codigo_retorne = concatenar_strings("return ", $2->codigo);
+                                             codigo_retorne = concatenar_strings(codigo_retorne, ";\n");
+                                             $$ = criar_no_expressao(codigo_retorne, $2->tipo);
+                                           }
        ;
 
 expressao: terminal_exp_cast_opc operador_binario expressao   { int tipos_compativeis = verificar_compatibilidade_operacao_binaria($2, $1->tipo, $3->tipo);
@@ -363,7 +369,7 @@ terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { if(verificar_cast($4
 
 terminal_exp: literal                              { /*Converter o literal para string*/ $$ = criar_no_expressao("literal", $1->tipo); }  //Retorna o tipo do nó literal
             | ID                                   { $$ = criar_no_expressao("id", inteiro); }        //Só para testes, mudar para consultar na tabela a variável e retorna o seu tipo
-            | ID PAR_ESQ argumentos_opc PAR_DIR    { $$ = criar_no_expressao("id(args)", inteiro); }  //Só para testes, mudar para consultar na tabela o procedimento/função e retorna o seu tipo de retorno
+            | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); /* gerar e retornar string de chama de subproc */ $$ = criar_no_expressao("id(args)", inteiro); }  //Só para testes, mudar para consultar na tabela o procedimento/função e retorna o seu tipo de retorno
             | ID indices_array                     { $$ = criar_no_expressao("id[i][j]", inteiro); }  //Só para testes, mudar para consultar na tabela o array e retorna o seu tipo
             | ID campos_registro                   { $$ = criar_no_expressao("id.campo", inteiro); }  //Só para testes, mudar para consultar na tabela o campo do registro e retorna o seu tipo
             ;
@@ -373,7 +379,7 @@ argumentos_opc: /* vazio */  { $$ = NULL; }
               ;
 
 argumentos: expressao                      { $$ = $1; }  //Adicionar e retornar um array com o tipo da expressao
-          | expressao VIRGULA argumentos   {  }  //Adicionar e retornar um array com o tipo da expressao
+          | expressao VIRGULA argumentos   { $$ = adicionar_no_expressao($1, $3); }  //Adicionar e retornar um array com o tipo da expressao
           ;
 %%
 
@@ -400,24 +406,25 @@ int main (int argc, char *argv[]) {
     }
 }
 
-int yyerror (char *msg) {
-  fprintf (stderr, "%d: %s próximo de '%s'\n", yylineno, msg, yytext);
+int yyerror(char* msg) {
+  fprintf (stderr, "Linha %d: Próximo de '%s'. %s.\n", yylineno, yytext, msg);
+  free(msg);
   return 0;
 }
 
 void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis) {
-  //Declarar cada variável
-  int i = 1;
   no_variavel_t* no_variavel_atual = variaveis;
-  while(no_variavel_atual != NULL) { //Erro aqui -> Não era pra entrar uma segunda vez
+  while(no_variavel_atual != NULL) {
     variavel_t* variavel_encontrada = consulta_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id);
     if(variavel_encontrada == NULL) {
-      int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id, tipo, 0); //Definir tamanho!!!
+      int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id, tipo, 0); //TODO Definir tamanho!!!
       if(variavel_declarada == 0) {
         printf("DECLAROU %s\n", no_variavel_atual->id);
       }
     } else {
-      yyerror("Redefinição de variavel");
+      char* message = malloc(snprintf(NULL, 0, "Redefinição da variavel '%s'", variavel_encontrada->id) + 1);
+      sprintf(message, "Redefinição da variavel '%s'", variavel_encontrada->id);
+      yyerror(message);
     }
     no_variavel_atual = no_variavel_atual->proximo;
   }
@@ -435,13 +442,73 @@ void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo
   if(subprograma_encontrado == NULL) {
     int subprograma_alocado = atualiza_subprograma(hash_subprogramas, id, retorno, parametros);
     if(subprograma_alocado == 0) {
-      printf("DECLAROU %s\n", id);
+      printf("DECLAROU SUB %s\n", id);
     }
   } else {
-    yyerror("Redefinição de subprograma");
+    char* message = malloc(snprintf(NULL, 0, "Redefinição do subprograma '%s'", subprograma_encontrado->id) + 1);
+    sprintf(message, "Redefinição do subprograma '%s'", subprograma_encontrado->id);
+    yyerror(message);
   }
 }
 
-void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, no_parametro_t *parametros) {
+void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual, no_parametro_t* parametros) {
+  if(parametros != NULL) {
+    no_parametro_t* no_parametro_atual = parametros;
+    while(no_parametro_atual != NULL) {
+      variavel_t* variavel_encontrada = consulta_escopo_atual(escopo_variaveis_atual, no_parametro_atual->id);
+      if(variavel_encontrada == NULL) {
+        int variavel_declarada = criar_variavel_escopo_atual(escopo_variaveis_atual, no_parametro_atual->id, no_parametro_atual->tipo, 0); //TODO Definir tamanho!!!
+        if(variavel_declarada == 0) {
+          printf("DECLAROU %s NO SUBPROGRAMA\n", no_parametro_atual->id);
+        }
+      } else {
+        char* message = malloc(snprintf(NULL, 0, "Redefinição da variavel '%s'", variavel_encontrada->id) + 1);
+        sprintf(message, "Redefinição da variavel '%s'", variavel_encontrada->id);
+        yyerror(message);
+      }
+      no_parametro_atual = no_parametro_atual->proximo;
+    }
+  }
+}
 
+void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, no_expressao_t *argumentos) {
+  subprograma_t* subprograma_encontrado = busca_subprograma(hash_subprogramas, id);
+  if(subprograma_encontrado != NULL) {
+    //Calcula número de argumentos recebidos
+    int num_args = 0;
+    no_expressao_t *argumento_atual = argumentos;
+    while(argumento_atual != NULL) {
+      num_args++;
+      argumento_atual = argumento_atual->proximo;
+    }
+
+    //Compara número de parâmetros com o número de argumentos do subprograma
+    if(subprograma_encontrado->num_parametros == num_args) {
+      //Verifica cada tipo recebido
+      argumento_atual = argumentos;
+      for(int i = 0; i < num_args; i++) {
+        if(argumento_atual->tipo != subprograma_encontrado->tipos_parametros[i]) {
+          char* message = malloc(snprintf(NULL, 0, "Tipo incorreto recebido na posição %d da chamada para o subprograma '%s'", i, id) + 1);
+          sprintf(message, "Tipo incorreto recebido na posição %d da chamada para o subprograma '%s'", i, id);
+          yyerror(message);
+        }
+      }
+    } else {
+      char* message = malloc(snprintf(NULL, 0, "Chamada para subprograma '%s' com número errado de argumentos. Esperava %d mas recebeu %d", id, subprograma_encontrado->num_parametros, num_args) + 1);
+      sprintf(message, "Chamada para subprograma '%s' com número errado de argumentos. Esperava %d mas recebeu %d", id, subprograma_encontrado->num_parametros, num_args);
+      yyerror(message);
+    }
+  } else {
+    char* message = malloc(snprintf(NULL, 0, "Chamada para subprograma '%s' não declarado", id) + 1);
+    sprintf(message, "Chamada para subprograma '%s' não declarado", id);
+    yyerror(message);
+  }
+}
+
+void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retornado) {
+  if(retorno_funcao != tipo_retornado) {
+    char* message = malloc(snprintf(NULL, 0, "Tipo incorreto retornado na função '%s'", id) + 1);
+    sprintf(message, "Tipo incorreto retornado na função '%s'", id);
+    yyerror(message);
+  }
 }
