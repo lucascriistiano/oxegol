@@ -18,6 +18,7 @@
 
   int num_enquanto = 0;
   int num_para = 0;
+  int num_se = 0;
 
   void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis);
   void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros);
@@ -32,6 +33,8 @@
   char* codigo;
   tipo_t tipo;
   valor_t valor;
+
+  se_t* se;
 
   no_literal_t* literal;
   no_expressao_t* expressao;
@@ -63,6 +66,8 @@
 %type<tipo> tipo array_tamanho_indice
 %type<valor> LITERAL_INTEIRO LITERAL_REAL LITERAL_BOOLEANO LITERAL_STRING LITERAL_CARACTERE
 
+%type<se> se_r senao senao_opc senao_se
+
 %type<literal> literal
 %type<expressao> expressao terminal_exp terminal_exp_cast_opc atribuicao atribuicao_opc argumentos argumentos_opc retorne
 
@@ -86,7 +91,7 @@ declaracoes_var: declaracao_var PONTO_E_VIRGULA                   { $$ = concate
                ;
 
 declaracao_var: tipo indices_array_opc var_declaradas { declarar_variaveis(escopo_variaveis_atual, $1, $2, $3);
-                                                        $$ = gerar_declaracao($1, $2, $3); 
+                                                        $$ = gerar_declaracao($1, $2, $3);
                                                       }
               ;
 
@@ -283,18 +288,25 @@ literal: LITERAL_INTEIRO     { $$ = criar_no_literal(inteiro, $1); }
        | LITERAL_CARACTERE   { $$ = criar_no_literal(caractere, $1); }
        ;
 
-se: SE PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco senao_opc  { $$ = "se"; }
+se: se_r { num_se++;
+           $$ = gerar_se(num_se, $1);
+         }
   ;
 
-senao_opc: /* vazio */
-         | senao
-         | senao_se
+se_r: SE PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco senao_opc  { se_t* se = criar_se($3->codigo, $6);
+                                                                                             $$ = adicionar_se(se, $8);
+                                                                                           }
+    ;
+
+senao_opc: /* vazio */  { $$ = NULL; }
+         | senao        { $$ = $1; }
+         | senao_se     { $$ = $1; }
          ;
 
-senao: SENAO abertura_bloco comandos_opc fechamento_bloco
+senao: SENAO abertura_bloco comandos_opc fechamento_bloco { $$ = criar_se(NULL, $3); }
      ;
 
-senao_se: SENAO se
+senao_se: SENAO se_r { $$ = $2; }
         ;
 
 para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { num_para++;
@@ -331,8 +343,7 @@ retorne: RETORNE expressao PONTO_E_VIRGULA { char* codigo_retorne = concatenar_s
 
 expressao: terminal_exp_cast_opc operador_binario expressao   { int tipos_compativeis = verificar_compatibilidade_operacao_binaria($2, $1->tipo, $3->tipo);
                                                                 if(tipos_compativeis) {
-                                                                  /* criar codigo da expressao concatenando os dois elementos e operador */
-                                                                  char* codigo_exp = "codigo_expressao_binaria";
+                                                                  char* codigo_exp = gerar_expressao_binaria($1->codigo, $3->codigo, $2->codigo);
                                                                   tipo_t tipo_retorno = verificar_tipo_retorno($2, $1->tipo);
                                                                   no_expressao_t* no_expressao = criar_no_expressao(codigo_exp, tipo_retorno);
                                                                   $$ = no_expressao;
@@ -342,8 +353,7 @@ expressao: terminal_exp_cast_opc operador_binario expressao   { int tipos_compat
                                                               }
          | operador_unario expressao                          { int operando_compativel = verificar_compatibilidade_operacao_unaria($1, $2->tipo);
                                                                 if(operando_compativel) {
-                                                                  /* criar codigo da expressao concatenando elemento e operador */
-                                                                  char* codigo_exp = "codigo_expressao_unaria";
+                                                                  char* codigo_exp = gerar_expressao_unaria($2->codigo, $1->codigo);
                                                                   tipo_t tipo_retorno = verificar_tipo_retorno($1, $2->tipo);
                                                                   no_expressao_t* no_expressao = criar_no_expressao(codigo_exp, tipo_retorno);
                                                                   $$ = no_expressao;
@@ -354,8 +364,7 @@ expressao: terminal_exp_cast_opc operador_binario expressao   { int tipos_compat
          | PAR_ESQ expressao PAR_DIR                          { $$ = $2; }
          | PAR_ESQ expressao PAR_DIR operador_binario terminal_exp_cast_opc { int tipos_compativeis = verificar_compatibilidade_operacao_binaria($4, $2->tipo, $5->tipo);
                                                                               if(tipos_compativeis) {
-                                                                                /* criar codigo da expressao concatenando os parenteses, codigo da exp, terminal e operador */
-                                                                                char* codigo_exp = "codigo_expressao_binaria_parentizada";
+                                                                                char* codigo_exp = gerar_expressao_binaria_parentizada($2->codigo, $5->codigo, $4->codigo);
                                                                                 tipo_t tipo_retorno = verificar_tipo_retorno($4, $2->tipo);
                                                                                 no_expressao_t* no_expressao = criar_no_expressao(codigo_exp, tipo_retorno);
                                                                                 $$ = no_expressao;
@@ -426,7 +435,13 @@ terminal_exp: literal                              { char* literal_em_string = c
                                                        $$ = criar_no_expressao($1, vazio); //Retorna variável com tipo vazio para variável não declarada
                                                      }
                                                    }
-            | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); /* gerar e retornar string de chama de subproc */ $$ = criar_no_expressao("id(args)", inteiro); }  //Só para testes, mudar para consultar na tabela o procedimento/função e retorna o seu tipo de retorno
+            | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3);
+                                                     char* codigo_chamada_sub = gerar_chamada_sub($1, $3);
+                                                     subprograma_t* subprograma_encontrado = busca_subprograma(hash_subprogramas, $1);
+                                                     if(subprograma_encontrado != NULL) {
+                                                       $$ = criar_no_expressao(codigo_chamada_sub, subprograma_encontrado->retorno);
+                                                     }
+                                                    }
             | ID indices_array                     { $$ = criar_no_expressao("id[i][j]", inteiro); }  //Só para testes, mudar para consultar na tabela o array e retorna o seu tipo
             | ID campos_registro                   { $$ = criar_no_expressao("id.campo", inteiro); }  //Só para testes, mudar para consultar na tabela o campo do registro e retorna o seu tipo
             ;
@@ -435,8 +450,8 @@ argumentos_opc: /* vazio */  { $$ = NULL; }
               | argumentos   { $$ = $1; }
               ;
 
-argumentos: expressao                      { $$ = $1; }  //Adicionar e retornar um array com o tipo da expressao
-          | expressao VIRGULA argumentos   { $$ = adicionar_no_expressao($1, $3); }  //Adicionar e retornar um array com o tipo da expressao
+argumentos: expressao                      { $$ = $1; }
+          | expressao VIRGULA argumentos   { $$ = adicionar_no_expressao($1, $3); }
           ;
 %%
 
@@ -444,6 +459,8 @@ int main (int argc, char *argv[]) {
     if (argc != 2) {
         printf("Uso: %s nome_do_arquivo", argv[0]);
     } else {
+        system("./apaga.sh");
+
         char *filename = argv[1];
         FILE *file = fopen(filename,"r+");
 
@@ -455,8 +472,16 @@ int main (int argc, char *argv[]) {
 
           yyin = file;
           yylineno = 1;
-          yyparse();
-          system("./compilaEApaga.sh");
+          int result = yyparse();
+          if(result == 0) {
+            printf("INICIANDO COMPILAÇÃO\n");
+            system("./compila.sh");
+            // system("./apaga.sh");
+          } else {
+            printf("ERROS ENCONTRADOS\n");
+            // system("./apaga.sh");
+          }
+
         }
 
         fclose(file);

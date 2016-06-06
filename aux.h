@@ -75,8 +75,6 @@ typedef struct no_parametro_s {
   struct no_parametro_s *proximo; // Proximos parâmetros identificados
 } no_parametro_t;
 
-// codigo_tipo_t* criar_codigo_tipo_cast(codigo_tipo_t* codigo_tipo, tipo_t tipo_destino);
-
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor);
 no_expressao_t* criar_no_expressao(char* codigo, tipo_t tipo);
 
@@ -108,18 +106,20 @@ char* gerar_label(char* comando, int numero);
 int escrever_arquivo_c(char* codigo);
 
 typedef struct se_s {
-    char *expressao;
-    char *comandos;
-    struct se_s *proximo;
+    char* expressao;
+    char* comandos;
+    struct se_s* proximo;
 } se_t;
 
 se_t* criar_se(char* exp, char* comandos);
-void adicionar_se(se_t* se, char* exp, char* comandos);
+// se_t* adicionar_se(se_t* se, char* exp, char* comandos);
+se_t* adicionar_se(se_t* se, se_t* novo_se);
 
+char* gerar_cast(no_expressao_t* expressao, tipo_t tipo_destino);
 char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada, char* comandos);
 char* gerar_enquanto(int nenquanto, char* exp_parada, char*comandos);
 char* gerar_escolha(char* id, char* caso_um_mais, char* caso_contrario);
-char* gerar_caso(char* valor, char* comandos);
+char* gerar_caso(no_literal_t* literal, char* comandos);
 char* gerar_caso_contrario(char* comandos);
 char* gerar_se(int nse, se_t* ses);
 char* gerar_comparar_char(char* primeira, char* segunda);
@@ -127,17 +127,18 @@ char* gerar_comparar_strings(char* primeira, char* segunda);
 char* gerar_principal(char* comandos_opc);
 char* gerar_procedimento(char* id, no_parametro_t* parametros_opc, char* comandos_opc);
 char* gerar_funcao(char* id, no_parametro_t* parametros_opc, tipo_t tipo, char* comandos_opc, no_expressao_t* exp_retorne);
-char* gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao);
-char* gerar_declaracao_sa(char* tipo, char* variavel);
+
+char* gerar_declaracao(tipo_t tipo, no_indice_array_t* indices_array_opc, no_variavel_t* variaveis);
 char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito);
-char* gerar_imprima(expressao exp);
+char* gerar_imprima(no_expressao_t* expressoes);
 char* gerar_leia(char* id, tipo_t tipo);
 char* gerar_concatena_texto(char* destino,char* primeira, char* segunda);
 char* gerar_includes();
 char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador);
+char* gerar_expressao_binaria_parentizada(char* lado_esquerdo_parentizado, char* lado_direito, char* operador);
 char* gerar_expressao_unaria(char* lado_esquerdo, char* operador);
 char* gerar_incremento(char* id);
 char* gerar_decremento(char* id);
-char* gerar_chamada_sub(char* id, char* parametros);
+char* gerar_chamada_sub(char* id, no_expressao_t* argumentos);
 
 #endif

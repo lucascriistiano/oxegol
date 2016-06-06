@@ -1,60 +1,5 @@
 #include "aux.h"
 
-// codigo_tipo_t* criar_codigo_tipo_cast(codigo_tipo_t* codigo_tipo, tipo_t tipo_destino) {
-//     char* codigo_original = codigo_tipo->codigo;
-
-//     char* novo_codigo;
-
-//     switch(tipo_destino) {
-//         case inteiro:
-//             novo_codigo = concatenar_strings("(int)", codigo_original);
-//             break;
-//         case real:
-//             novo_codigo = concatenar_strings("(float)", codigo_original);
-//             break;
-//         // case booleano:
-//         //     novo_codigo = concatenar_strings("(int)", codigo_original);
-//         //     break;
-//         case caractere:
-//             novo_codigo = concatenar_strings("(char)", codigo_original);
-//             break;
-//         case string:
-//             switch(tipo_destino) {
-//                 case inteiro:
-//                     char* resultado = "";
-//                     resultado = concatenar_strings(resultado, "itoa(");
-//                     resultado = concatenar_strings(resultado, codigo_original);
-//                     resultado = concatenar_strings(resultado, ")");
-//                     novo_codigo = resultado;
-//                     break;
-//                 case real:
-//                     char* resultado = "";
-//                     resultado = concatenar_strings(resultado, "ftoa(");
-//                     resultado = concatenar_strings(resultado, codigo_original);
-//                     resultado = concatenar_strings(resultado, ")");
-//                     novo_codigo = resultado;
-//                     break;
-//                 // case booleano:
-//                 //     novo_codigo = concatenar_strings("(int)", codigo_original);
-//                 //     break;
-//                 case caractere:
-//                     novo_codigo = concatenar_strings("(char)", codigo_original);
-//                     break;
-//                 case string:
-//                     novo_codigo = concatenar_strings("(char)", codigo_original);
-//                     break;
-//             }
-
-//             novo_codigo = concatenar_strings("(char)", codigo_original);
-//             break;
-//     }
-
-//     codigo_tipo_t* codigo_tipo_cast = (codigo_tipo_t*) malloc(sizeof(codigo_tipo_t));
-//     codigo_tipo_cast->codigo = strdup(codigo);
-//     codigo_tipo_cast->tipo = tipo;
-//     return codigo_tipo_cast;
-// }
-
 no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor) {
   no_literal_t* no = (no_literal_t*) malloc(sizeof(no_literal_t));
   no->tipo = tipo;
@@ -228,7 +173,6 @@ int verificar_cast(tipo_t tipo_origem, tipo_t tipo_destino) {
     if(tipo_origem == tipo_destino) return 1;
     if(tipo_origem == inteiro && (tipo_destino == real || tipo_destino == caractere)) return 1;
     if(tipo_origem == real && tipo_destino == inteiro) return 1;
-    if(tipo_origem == caractere && tipo_destino == string) return 1;
 
     return 0; //Tipos não conversíveis
 }
@@ -318,12 +262,21 @@ char* gerar_concatena_texto(char* destino,char* primeira, char* segunda){
 }
 
 char* gerar_label(char* comando, int numero) {
-    char numero_char[15];
-	sprintf(numero_char, "%d", numero);
-	size_t tamanho =(strlen(comando)+strlen(numero_char) + 1);
-	char *resultado = malloc(tamanho *sizeof(char));
-    sprintf(resultado, "%s%s", comando, numero_char);
-    return resultado;
+    char* numero_char = malloc(snprintf(NULL, 0, "%s%d", comando, numero) + 1);
+    sprintf(numero_char, "%s%d", comando, numero);
+    return numero_char;
+}
+
+char* gerar_cast(no_expressao_t* expressao, tipo_t tipo_destino) {
+    if(tipo_destino == inteiro) {
+        return concatenar_strings("(int)", expressao->codigo);
+    } else if(tipo_destino == real) {
+        return concatenar_strings("(float)", expressao->codigo);
+    } else if(tipo_destino == caractere) {
+        return concatenar_strings("(char)", expressao->codigo);
+    } else {
+        return concatenar_strings("", expressao->codigo); //Tipo destino de cast não aceito
+    }
 }
 
 char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada, char* comandos) {
@@ -368,7 +321,8 @@ char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada,
     retorno = concatenar_strings(retorno, d);
     retorno = concatenar_strings(retorno, ":\n");
     retorno = concatenar_strings(retorno, id);
-    retorno = concatenar_strings(retorno, "--;\n goto");
+    retorno = concatenar_strings(retorno, "--;\n");
+    retorno = concatenar_strings(retorno, "goto ");
 
     char *c = concatenar_strings("condicao", label);
     retorno = concatenar_strings(retorno, c);
@@ -377,7 +331,8 @@ char* gerar_para(int npara, char* id, char* exp_inicializacao, char* exp_parada,
     retorno = concatenar_strings(retorno, i);
     retorno = concatenar_strings(retorno, ":\n");
     retorno = concatenar_strings(retorno, id);
-    retorno = concatenar_strings(retorno, "++;\n goto");
+    retorno = concatenar_strings(retorno, "++;\n");
+    retorno = concatenar_strings(retorno, "goto ");
     retorno = concatenar_strings(retorno, c);
     retorno = concatenar_strings(retorno, ";\n");
 
@@ -431,9 +386,9 @@ char* gerar_escolha(char* id, char* caso_um_mais, char* caso_contrario) {
     return retorno;
 }
 
-char* gerar_caso(char* valor, char*  comandos) {
+char* gerar_caso(no_literal_t* literal, char* comandos) {
     char *retorno = "case ";
-    retorno = concatenar_strings(retorno, valor);
+    retorno = concatenar_strings(retorno, converter_literal_para_string(literal));
     retorno = concatenar_strings(retorno, ":\n");
     retorno = concatenar_strings(retorno, comandos);
     retorno = concatenar_strings(retorno, "break;\n");
@@ -448,81 +403,61 @@ char* gerar_caso_contrario(char*  comandos) {
 
 char* gerar_se(int nse, se_t* ses) {
     char *label = gerar_label("if", nse);
+    char *label_exit = concatenar_strings(label, "_exit");
+    char *label_local_base = concatenar_strings(label, "l");
+
+    char *retorno = "";
+
     int nlabel = 0;
-    char *labelocal = gerar_label("l", nlabel);
-
-    char *retorno = "if(";
-    retorno = concatenar_strings(retorno, ses->expressao);
-    retorno = concatenar_strings(retorno, "){\n");
-    retorno = concatenar_strings(retorno, "goto ");
-    retorno = concatenar_strings(retorno, label);
-    retorno = concatenar_strings(retorno, labelocal);
-    retorno = concatenar_strings(retorno, ";}\n");
-
-    nlabel++;
-
     se_t* se_atual = ses;
-    while (se_atual->proximo != NULL) {
-        se_atual = se_atual->proximo;
-
-        if(se_atual->expressao != NULL){
-            //senao se
+    while(se_atual != NULL) {
+        if(se_atual->expressao != NULL) {
             retorno = concatenar_strings(retorno, "if(");
             retorno = concatenar_strings(retorno, se_atual->expressao);
-            char *retorno = "){\n";
+            retorno = concatenar_strings(retorno, ") {\n");
             retorno = concatenar_strings(retorno, "goto ");
-            retorno = concatenar_strings(retorno, label);
-            labelocal = gerar_label("l", nlabel);
-            retorno = concatenar_strings(retorno, labelocal);
-            retorno = concatenar_strings(retorno, ";}\n");
-        }
-        else{
-            //senao
+            retorno = concatenar_strings(retorno, gerar_label(label_local_base, nlabel));
+            retorno = concatenar_strings(retorno, ";\n");
+            retorno = concatenar_strings(retorno, "}\n");
+            nlabel++;
+        } else {
+            //Comandos senao
             retorno = concatenar_strings(retorno, se_atual->comandos);
+            retorno = concatenar_strings(retorno, "\n");
+            retorno = concatenar_strings(retorno, "goto ");
+            retorno = concatenar_strings(retorno, label_exit);
+            retorno = concatenar_strings(retorno, ";\n\n");
         }
-        nlabel++;
+
+        se_atual = se_atual->proximo;
     }
 
     nlabel = 0;
-    retorno = concatenar_strings(retorno, label);
-    retorno = concatenar_strings(retorno, labelocal);
-    retorno = concatenar_strings(retorno, ":\n");
-    retorno = concatenar_strings(retorno, se_atual->comandos);
-    retorno = concatenar_strings(retorno, "\n goto exit");
-    retorno = concatenar_strings(retorno, label);
-    retorno = concatenar_strings(retorno, ";\n");
-
-    nlabel++;
     se_atual = ses;
-    while (se_atual->proximo != NULL) {
-        se_atual = se_atual->proximo;
-
+    while (se_atual != NULL) {
         if(se_atual->expressao != NULL){
-            //senao se
-            retorno = concatenar_strings(retorno, label);
-            retorno = concatenar_strings(retorno, labelocal);
+            //Comandos se/senao se
+            retorno = concatenar_strings(retorno, gerar_label(label_local_base, nlabel));
             retorno = concatenar_strings(retorno, ":\n");
             retorno = concatenar_strings(retorno, se_atual->comandos);
-            retorno = concatenar_strings(retorno, "\n goto exit");
-            retorno = concatenar_strings(retorno, label);
-            retorno = concatenar_strings(retorno, ";\n");
-
+            retorno = concatenar_strings(retorno, "\n");
+            retorno = concatenar_strings(retorno, "goto ");
+            retorno = concatenar_strings(retorno, label_exit);
+            retorno = concatenar_strings(retorno, ";\n\n");
+            nlabel++;
         }
-        else{
-            //senao
 
-        }
-        nlabel++;
+        se_atual = se_atual->proximo;
     }
 
-    retorno = concatenar_strings(retorno, "\n exit");
-    retorno = concatenar_strings(retorno, label);
-    retorno = concatenar_strings(retorno, ":\n");
+    retorno = concatenar_strings(retorno, "\n");
+    retorno = concatenar_strings(retorno, label_exit);
+    retorno = concatenar_strings(retorno, ":;\n");
     return retorno;
 }
 
 char* gerar_funcao(char* id, no_parametro_t* parametros_opc, tipo_t tipo, char* comandos_opc, no_expressao_t* exp_retorne) {
-	char* retorno = "";
+	char* retorno = "\n";
     retorno = concatenar_strings(retorno, converter_tipo_para_string(tipo));
     retorno = concatenar_strings(retorno, " ");
 	retorno = concatenar_strings(retorno, id);
@@ -548,7 +483,7 @@ char* gerar_funcao(char* id, no_parametro_t* parametros_opc, tipo_t tipo, char* 
 }
 
 char* gerar_procedimento(char* id, no_parametro_t* parametros_opc, char* comandos_opc) {
-	char* retorno = "";
+	char* retorno = "\n";
 	retorno = concatenar_strings(retorno, "void");
 	retorno = concatenar_strings(retorno, " ");
 	retorno = concatenar_strings(retorno, id);
@@ -572,10 +507,12 @@ char* gerar_procedimento(char* id, no_parametro_t* parametros_opc, char* comando
 }
 
 char* gerar_principal(char* comandos_opc){
-	char* retorno = "int main(){\n";
-	retorno = concatenar_strings(retorno, comandos_opc);
+	char* retorno = "\n";
+    retorno = concatenar_strings(retorno, "int main() {\n");
+
+    retorno = concatenar_strings(retorno, comandos_opc);
 	retorno = concatenar_strings(retorno, "return 0;");
-	retorno = concatenar_strings(retorno, "}\n");
+	retorno = concatenar_strings(retorno, "\n}\n");
     return retorno;
 }
 
@@ -603,7 +540,7 @@ char* gerar_comparar_strings( char* primeira, char* segunda) {
 
 char* gerar_includes() {
     char *retorno = "#include <stdio.h>\n";
-    retorno = concatenar_strings(retorno,"#include <stlib.h>\n");
+    retorno = concatenar_strings(retorno,"#include <stdlib.h>\n");
     retorno = concatenar_strings(retorno,"#include <string.h>\n\n");
     return retorno;
 }
@@ -625,110 +562,86 @@ char* gerar_comparar_char(char* primeira, char* segunda){
 }
 
 char* gerar_leia(char* id, tipo_t tipo){
-    char* retorno = "scanf";
-    retorno = concatenar_strings(retorno, "(");
-    retorno = concatenar_strings(retorno,"%");
-    
+    char* retorno = "scanf(\"";
     switch(tipo){
         case inteiro:
-            retorno = concatenar_strings(retorno, "%i");
+            retorno = concatenar_strings(retorno, "%d");
             break;
         case real:
-            retorno = concatenar_strings(retorno, "%d");
+            retorno = concatenar_strings(retorno, "%f");
             break;
         case booleano:
             retorno = concatenar_strings(retorno, "%i");
             break;
         case caractere:
-            retorno = concatenar_strings(retorno, "%s");
+            retorno = concatenar_strings(retorno, "%c");
             break;
         case string:
             retorno = concatenar_strings(retorno, "%s");
             break;
         case vazio:
-            //Não sei que fazer aqui!!!!
+            return NULL;
             break;
     }
-    
-   
-    
-    retorno = concatenar_strings(retorno,",");
-    retorno = concatenar_strings(retorno,"&");
+
+    retorno = concatenar_strings(retorno,"\", &");
     retorno = concatenar_strings(retorno, id);
-    retorno = concatenar_strings(retorno, ")");
-    retorno = concatenar_strings(retorno, ";\n");
-    return retorno;
-}
-
-char* gerar_imprima(expressao exp){
-  
-    char* retorno = "printf";
-    retorno = concatenar_strings(retorno, "(");
-
-    switch(exp->tipo){
-        case inteiro:
-            retorno = concatenar_strings(retorno, "%i");
-            break;
-        case real:
-            retorno = concatenar_strings(retorno, "%d");
-            break;
-        case booleano:
-            retorno = concatenar_strings(retorno, "%i");
-            break;
-        case caractere:
-            retorno = concatenar_strings(retorno, "%s");
-            break;
-        case string:
-            retorno = concatenar_strings(retorno, "%s");
-            break;
-        case vazio:
-            //Não sei que fazer aqui!!!!
-            break;
-    }
-        
-    expressao exp_atual= exp;
-    while (exp_atual->proximo != NULL){
-        retorno = concatenar_strings(retorno, ",");
-        exp_atual = exp_atual->proximo; 
-        
-        switch(exp_atual->tipo){
-        case inteiro:
-            retorno = concatenar_strings(retorno, "%i");
-            break;
-        case real:
-            retorno = concatenar_strings(retorno, "%d");
-            break;
-        case booleano:
-            retorno = concatenar_strings(retorno, "%i");
-            break;
-        case caractere:
-            retorno = concatenar_strings(retorno, "%s");
-            break;
-        case string:
-            retorno = concatenar_strings(retorno, "%s");
-            break;
-        case vazio:
-            //Não sei que fazer aqui!!!!
-            break;
-        }
-        
-    }
-    retorno = concatenar_strings(retorno, ",");
-    retorno = concatenar_strings(retorno, exp->codigo);
-    
-    expressao exp_atual= exp;
-    while (exp_atual->proximo != NULL){
-        retorno = concatenar_strings(retorno, ",");
-        exp_atual = exp_atual->proximo; 
-        retorno = concatenar_strings(retorno, exp_atual->codigo);
-    }
-    
     retorno = concatenar_strings(retorno, ");\n");
     return retorno;
 }
 
+char* gerar_imprima(no_expressao_t* expressoes){
+    char* retorno = "printf(\"";
 
-char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador  ){
+    no_expressao_t* exp_atual = expressoes;
+    while (exp_atual != NULL){
+        switch(exp_atual->tipo){
+        case inteiro:
+            retorno = concatenar_strings(retorno, "%d");
+            break;
+        case real:
+            retorno = concatenar_strings(retorno, "%f");
+            break;
+        case booleano:
+            retorno = concatenar_strings(retorno, "%d");
+            break;
+        case caractere:
+            retorno = concatenar_strings(retorno, "%c");
+            break;
+        case string:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case vazio:
+            break;
+        }
+
+        if(exp_atual->proximo != NULL) {
+            retorno = concatenar_strings(retorno, " ");
+        }
+        exp_atual = exp_atual->proximo;
+    }
+    retorno = concatenar_strings(retorno, "\", ");
+
+    exp_atual= expressoes;
+    while (exp_atual != NULL) {
+        if(exp_atual->tipo == vazio) {
+            continue;
+        }
+
+        retorno = concatenar_strings(retorno, exp_atual->codigo);
+
+        if(exp_atual->proximo != NULL) {
+            retorno = concatenar_strings(retorno, ", ");
+        }
+        exp_atual = exp_atual->proximo;
+    }
+
+    retorno = concatenar_strings(retorno, ");\n");
+    retorno = concatenar_strings(retorno, "printf(\"\\n\");");
+    return retorno;
+}
+
+char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador){
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, lado_esquerdo);
 	retorno = concatenar_strings(retorno,  " ");
@@ -738,7 +651,19 @@ char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* ope
     return retorno;
 }
 
-char* gerar_expressao_unaria(char* lado_esquerdo, char* operador  ){
+char* gerar_expressao_binaria_parentizada(char* lado_esquerdo_parentizado, char* lado_direito, char* operador) {
+    char* retorno = "";
+    retorno = concatenar_strings(retorno, "(");
+    retorno = concatenar_strings(retorno, lado_esquerdo_parentizado);
+    retorno = concatenar_strings(retorno, ")");
+    retorno = concatenar_strings(retorno,  " ");
+    retorno = concatenar_strings(retorno, operador);
+    retorno = concatenar_strings(retorno,  " ");
+    retorno = concatenar_strings(retorno, lado_direito);
+    return retorno;
+}
+
+char* gerar_expressao_unaria(char* lado_esquerdo, char* operador){
 	char* retorno = "(";
 	retorno = concatenar_strings(retorno, lado_esquerdo);
 	retorno = concatenar_strings(retorno,  " ");
@@ -756,14 +681,6 @@ char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito ){
     return retorno;
 }
 
-char * gerar_declaracao_sa(char* tipo, char* variavel ){
-	char* retorno = "";
-	retorno = concatenar_strings(retorno, tipo);
-	retorno = concatenar_strings(retorno, variavel);
-	retorno = concatenar_strings(retorno, ";");
-    return retorno;
-}
-
 char * gerar_incremento(char* id){
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, id);
@@ -778,42 +695,82 @@ char * gerar_decremento(char* id){
     return retorno;
 }
 
-char * gerar_chamada_sub(char* id, char* parametros){
+char* gerar_chamada_sub(char* id, no_expressao_t* argumentos) {
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, id);
 	retorno = concatenar_strings(retorno, "(");
-	retorno = concatenar_strings(retorno, parametros);
-	retorno = concatenar_strings(retorno, ");\n");
+
+    no_expressao_t* argumento_atual = argumentos;
+    while(argumento_atual != NULL) {
+        retorno = concatenar_strings(retorno, argumento_atual->codigo);
+
+        if(argumento_atual->proximo != NULL) {
+            retorno = concatenar_strings(retorno, ", ");
+        }
+
+        argumento_atual = argumento_atual->proximo;
+    }
+
+	retorno = concatenar_strings(retorno, ")");
     return retorno;
 }
 
+char* gerar_declaracao(tipo_t tipo, no_indice_array_t* indices_array_opc, no_variavel_t* variaveis) {
+    char* retorno = "";
+    retorno = concatenar_strings(retorno, converter_tipo_para_string(tipo));
+    retorno = concatenar_strings(retorno, " ");
 
-char * gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao  ){
-	char* retorno = "";
-	retorno = concatenar_strings(retorno, tipo);
-	retorno = concatenar_strings(retorno, variavel);
-	retorno = gerar_atribuicao(retorno, inicializacao);
-	retorno = concatenar_strings(retorno, ";");
+    //TODO Adicionar indices array
+    // no_indice_array_t* indice_atual = indices_array_opc;
+    // while(indice_atual != NULL) {
+    //     retorno = concatenar_strings(retorno, "[");
+
+    //     char* indice = malloc(snprintf(NULL, 0, "%d", indice_atual->indice) + 1);
+    //     sprintf(indice, "%d", indice_atual->indice);
+    //     retorno = concatenar_strings(retorno, indice);
+    //     free(indice);
+
+    //     retorno = concatenar_strings(retorno, "]");
+    //     indice_atual = indice_atual->proximo;
+    // }
+    // retorno = concatenar_strings(retorno, " ");
+
+    no_variavel_t* variavel_atual = variaveis;
+    while(variavel_atual != NULL) {
+        retorno = concatenar_strings(retorno, variavel_atual->codigo);
+
+        if(variavel_atual->proximo != NULL) {
+            retorno = concatenar_strings(retorno, ", ");
+        }
+        variavel_atual = variavel_atual->proximo;
+    }
     return retorno;
 }
 
-
-
-se_t* criar_se(char* exp, char* comandos){
+se_t* criar_se(char* expressao, char* comandos){
     se_t* se = (se_t*) malloc(sizeof(se_t));
-    se->expressao = exp;
+    se->expressao = expressao;
     se->comandos = comandos;
     se->proximo = NULL;
     return se;
 }
 
-void adicionar_se(se_t* se, char* exp, char* comandos) {
+// se_t* adicionar_se(se_t* se, char* exp, char* comandos) {
+//     se_t* se_atual = se;
+//     while (se_atual->proximo != NULL) {
+//         se_atual = se_atual->proximo;
+//     }
+
+//     se_t* novo_se = criar_se(exp, comandos);
+//     se_atual->proximo = novo_se;
+//     return se;
+// }
+
+se_t* adicionar_se(se_t* se, se_t* novo_se) {
     se_t* se_atual = se;
     while (se_atual->proximo != NULL) {
         se_atual = se_atual->proximo;
     }
-
-    //TODO Verificar se conseguiu alocar (para todos os outros => Ctrl + F malloc)
-    se_t* novo_se = criar_se(exp, comandos);
     se_atual->proximo = novo_se;
+    return se;
 }
