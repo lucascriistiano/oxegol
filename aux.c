@@ -548,11 +548,34 @@ char* gerar_comparar_char(char primeira, char segunda){
     return retorno;
 }
 
-char* gerar_leia(char* id, char* tipo){
+char* gerar_leia(char* id, tipo_t tipo){
     char* retorno = "scanf";
     retorno = concatenar_strings(retorno, "(");
     retorno = concatenar_strings(retorno,"%");
-    retorno = concatenar_strings(retorno, tipo);
+    
+    switch(tipo){
+        case inteiro:
+            retorno = concatenar_strings(retorno, "%i");
+            break;
+        case real:
+            retorno = concatenar_strings(retorno, "%d");
+            break;
+        case booleano:
+            retorno = concatenar_strings(retorno, "%i");
+            break;
+        case caractere:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case string:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case vazio:
+            //Não sei que fazer aqui!!!!
+            break;
+    }
+    
+   
+    
     retorno = concatenar_strings(retorno,",");
     retorno = concatenar_strings(retorno,"&");
     retorno = concatenar_strings(retorno, id);
@@ -561,12 +584,70 @@ char* gerar_leia(char* id, char* tipo){
     return retorno;
 }
 
-char* gerar_imprima(char* argumentos){
+char* gerar_imprima(expressao exp){
+  
     char* retorno = "printf";
     retorno = concatenar_strings(retorno, "(");
-    retorno = concatenar_strings(retorno, argumentos);
-    retorno = concatenar_strings(retorno, ")");
-    retorno = concatenar_strings(retorno, ";\n");
+
+    switch(exp->tipo){
+        case inteiro:
+            retorno = concatenar_strings(retorno, "%i");
+            break;
+        case real:
+            retorno = concatenar_strings(retorno, "%d");
+            break;
+        case booleano:
+            retorno = concatenar_strings(retorno, "%i");
+            break;
+        case caractere:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case string:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case vazio:
+            //Não sei que fazer aqui!!!!
+            break;
+    }
+        
+    expressao exp_atual= exp;
+    while (exp_atual->proximo != NULL){
+        retorno = concatenar_strings(retorno, ",");
+        exp_atual = exp_atual->proximo; 
+        
+        switch(exp_atual->tipo){
+        case inteiro:
+            retorno = concatenar_strings(retorno, "%i");
+            break;
+        case real:
+            retorno = concatenar_strings(retorno, "%d");
+            break;
+        case booleano:
+            retorno = concatenar_strings(retorno, "%i");
+            break;
+        case caractere:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case string:
+            retorno = concatenar_strings(retorno, "%s");
+            break;
+        case vazio:
+            //Não sei que fazer aqui!!!!
+            break;
+        }
+        
+    }
+    retorno = concatenar_strings(retorno, ",");
+    retorno = concatenar_strings(retorno, exp->codigo);
+    
+    expressao exp_atual= exp;
+    while (exp_atual->proximo != NULL){
+        retorno = concatenar_strings(retorno, ",");
+        exp_atual = exp_atual->proximo; 
+        retorno = concatenar_strings(retorno, exp_atual->codigo);
+    }
+    
+    retorno = concatenar_strings(retorno, ");\n");
     return retorno;
 }
 
@@ -607,6 +688,30 @@ char * gerar_declaracao_sa(char* tipo, char* variavel ){
     return retorno;
 }
 
+char * gerar_incremento(char* id){
+	char* retorno = "";
+	retorno = concatenar_strings(retorno, id);
+	retorno = concatenar_strings(retorno, "++;");
+    return retorno;
+}
+
+char * gerar_decremento(char* id){
+	char* retorno = "";
+	retorno = concatenar_strings(retorno, id);
+	retorno = concatenar_strings(retorno, "--;");
+    return retorno;
+}
+
+char * gerar_chamada_sub(char* id, char* parametros){
+	char* retorno = "";
+	retorno = concatenar_strings(retorno, id);
+	retorno = concatenar_strings(retorno, "(");
+	retorno = concatenar_strings(retorno, parametros);
+	retorno = concatenar_strings(retorno, ");\n");
+    return retorno;
+}
+
+
 char * gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao  ){
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, tipo);
@@ -615,6 +720,8 @@ char * gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao  ){
 	retorno = concatenar_strings(retorno, ";");
     return retorno;
 }
+
+
 
 se_t* criar_se(char* exp, char* comandos){
     se_t* se = (se_t*) malloc(sizeof(se_t));

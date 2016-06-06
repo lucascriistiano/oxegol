@@ -88,8 +88,7 @@ declaracoes_var: declaracao_var PONTO_E_VIRGULA                   { $$ = concate
                ;
 
 declaracao_var: tipo indices_array_opc var_declaradas { declarar_variaveis(escopo_variaveis_atual, $1, $2, $3);
-                                                        $$ = "declaracao_var";
-                                                        /* $$ = gerar_declaracao($1, $2, $3); */
+                                                        $$ = gerar_declaracao($1, $2, $3); 
                                                       }
               ;
 
@@ -172,7 +171,7 @@ instrucao: PARE                                 { $$ = "break"; }
          | ID incremento                        { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, inteiro); //só para testes mudar
                                                   //int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
                                                   if(operando_compativel) {
-                                                    $$ = "incremento";
+                                                    $$ = gerar_incremento($1);
                                                   } else {
                                                     yyerror("Tipo não suportado");
                                                   }
@@ -180,15 +179,15 @@ instrucao: PARE                                 { $$ = "break"; }
          | ID decremento                        { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, inteiro); //Só para testes mudar
                                                   //int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
                                                   if(operando_compativel) {
-                                                    $$ = "decremento";
+                                                    $$ = gerar_decremento($1);
                                                   } else {
                                                     yyerror("Tipo não suportado");
                                                   }
                                                 }
-         | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); /* gerar e retornar string de chamada de subproc */ $$ = "instSubprograma(argumentos)"; }
+         | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); $$ = gerar_chamada_sub($1, $3); }
          | ID campos_registro atribuicao        { /* gerar e retornar string de atribuicao a registro */ $$ = "registro.campo = valor"; }
-         | IMPRIMA PAR_ESQ argumentos PAR_DIR   { /* gerar e retornar string do comando do imprima */ $$ = "imprima"; }
-         | LEIA PAR_ESQ ID PAR_DIR              { /* gerar e retornar string do comando do leia */ $$ = "leia"; }
+         | IMPRIMA PAR_ESQ argumentos PAR_DIR   { $$ = gerar_imprima($3); } /*tem que passar os tipos*/
+         | LEIA PAR_ESQ ID PAR_DIR              { /* descobrir o tipo da variavel */ tipo_t tipo = inteiro ; $$ = gerar_leia($3, tipo ); }
          | COMPARATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR {  }
          | ID indices_array_opc ATRIBUICAO CONCATENATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR  { $$ = "concatena_texto"; /* $$ = gerar_concatena_texto($1, $2, $6, $8); */ } //Desalocar a variavel
          ;
@@ -202,10 +201,10 @@ decremento: DECREMENTO  { no_operador_t* operadores = criar_no_operador("--", in
 campos_registro: PONTO ID
                | campos_registro PONTO ID
 
-declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { declarar_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc retorne { verificar_retorno_funcao($2, $7, $12->tipo); } fechamento_bloco { $$ = "declaracao_funcao"; /* gera e joga código pra cima */ }
+declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { declarar_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc retorne { verificar_retorno_funcao($2, $7, $12->tipo); } fechamento_bloco { $$ = gerar_funcao($2, $4, $7, $11); }
                ;
 
-declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { declarar_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc fechamento_bloco { $$ = "declaracao_proc"; /* gera e joga código pra cima */ }
+declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { declarar_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc fechamento_bloco { $$ = gerar_procedimento( $2, $4, $9); }
                ;
 
 declaracao_registro: REGISTRO ID abertura_bloco campo_um_mais fechamento_bloco { $$ = "declaracao_registro"; }
@@ -263,23 +262,23 @@ senao: SENAO abertura_bloco comandos_opc fechamento_bloco
 senao_se: SENAO se
         ;
 
-para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = "para"; }
+para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = gerar_para(1,$3, $5, $7, $10); }
     ;
 
-escolha: ESCOLHA PAR_ESQ ID PAR_DIR abertura_bloco caso_um_mais caso_contrario fechamento_bloco  { $$ = "escolha"; }
+escolha: ESCOLHA PAR_ESQ ID PAR_DIR abertura_bloco caso_um_mais caso_contrario fechamento_bloco  { $$ = gerar_escolha($3, $6, $7); }
        ;
 
 caso_um_mais: caso caso_opc  { $$ = concatenar_strings($1, $2); }
             ;
 
-caso: CASO literal DOIS_PONTOS comandos_opc  { $$ = "caso"; }
+caso: CASO literal DOIS_PONTOS comandos_opc  { $$ = gerar_caso($2, $4); }
     ;
 
 caso_opc: /* vazio */     { $$ = ""; }
         | caso_opc caso   { $$ = concatenar_strings($1, $2); }
         ;
 
-caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc   { /*gerar e retornar caso_contario*/ $$ = "caso_contrario"; }
+caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc   { $$ = gerar_caso_contrario($3); }
               ;
 
 enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { num_enquanto++; $$ = gerar_enquanto(num_enquanto, $3->codigo, $6); }

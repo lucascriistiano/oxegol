@@ -127,11 +127,14 @@ char* gerar_funcao(char* id, char* parametros_opc, char* tipo, char* comandos_op
 char* gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao);
 char* gerar_declaracao_sa(char* tipo, char* variavel);
 char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito);
-char* gerar_imprima(char* argumentos);
-char* gerar_leia(char* id, char* tipo);
+char* gerar_imprima(expressao exp);
+char* gerar_leia(char* id, tipo_t tipo);
 char* gerar_concatena_texto(char* destino,char* primeira, char* segunda);
 char* gerar_includes();
 char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador);
 char* gerar_expressao_unaria(char* lado_esquerdo, char* operador);
+char* gerar_incremento(char* id);
+char* gerar_decremento(char* id);
+char* gerar_chamada_sub(char* id, char* parametros);
 
 #endif
