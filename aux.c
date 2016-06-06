@@ -201,7 +201,6 @@ int verificar_compatibilidade_operacao_binaria(no_operador_t* operador, tipo_t t
     if(operador_posicionado->tipo != tipo_op1) {
         return 0; // Tipo não aceito
     }
-
     return 1; // Tipos compatíveis e aceitos pelo operador
 }
 
@@ -214,7 +213,6 @@ int verificar_compatibilidade_operacao_unaria(no_operador_t* operador, tipo_t ti
     if(operador_posicionado->tipo != tipo_op) {
         return 0; // Tipo não aceito
     }
-
     return 1; // Tipos aceito pelo operador
 }
 
@@ -223,7 +221,6 @@ tipo_t verificar_tipo_retorno(no_operador_t* operador, tipo_t tipo) {
     while(operador_posicionado->tipo != tipo && operador_posicionado->proximo != NULL) {
         operador_posicionado = operador_posicionado->proximo;
     }
-
     return operador_posicionado->retorno;
 }
 
@@ -234,6 +231,65 @@ int verificar_cast(tipo_t tipo_origem, tipo_t tipo_destino) {
     if(tipo_origem == caractere && tipo_destino == string) return 1;
 
     return 0; //Tipos não conversíveis
+}
+
+char* converter_literal_para_string(no_literal_t* literal) {
+  tipo_t tipo_literal = literal->tipo;
+  char* literal_string;
+  switch(tipo_literal) {
+    case inteiro:
+      literal_string = malloc(snprintf(NULL, 0, "%d", literal->valor.ival) + 1);
+      sprintf(literal_string, "%d", literal->valor.ival);
+      break;
+
+    case real:
+      literal_string = malloc(snprintf(NULL, 0, "%f", literal->valor.fval) + 1);
+      sprintf(literal_string, "%f", literal->valor.fval);
+      break;
+
+    case booleano:
+      literal_string = malloc(snprintf(NULL, 0, "%d", literal->valor.bval) + 1);
+      sprintf(literal_string, "%d", literal->valor.bval);
+      break;
+
+    case caractere:
+      literal_string = malloc(snprintf(NULL, 0, "%c", literal->valor.cval) + 1);
+      sprintf(literal_string, "%c", literal->valor.cval);
+      break;
+
+    case string:
+      literal_string = malloc(snprintf(NULL, 0, "%s", literal->valor.sval) + 1);
+      sprintf(literal_string, "%s", literal->valor.sval);
+      break;
+
+    default:
+      printf("Tipo %u não reconhecido\n", tipo_literal);
+      return NULL;
+  }
+  return literal_string;
+}
+
+char* converter_tipo_para_string(tipo_t tipo) {
+  switch(tipo) {
+    case inteiro:
+      return "int";
+
+    case real:
+      return "float";
+
+    case booleano:
+      return "int";
+
+    case caractere:
+      return "char";
+
+    case string:
+      return "char*";
+
+    default:
+      printf("Tipo %u não reconhecido\n", tipo);
+      return "";
+  }
 }
 
 char* concatenar_strings(char* primeira, char* segunda) {
@@ -465,37 +521,57 @@ char* gerar_se(int nse, se_t* ses) {
     return retorno;
 }
 
-char* gerar_funcao(char* id, char* parametros_opc, char* tipo, char* comandos_opc) {
+char* gerar_funcao(char* id, no_parametro_t* parametros_opc, tipo_t tipo, char* comandos_opc, no_expressao_t* exp_retorne) {
 	char* retorno = "";
-	retorno = concatenar_strings(retorno, tipo);
-	retorno = concatenar_strings(retorno, " ");
+    retorno = concatenar_strings(retorno, converter_tipo_para_string(tipo));
+    retorno = concatenar_strings(retorno, " ");
 	retorno = concatenar_strings(retorno, id);
 	retorno = concatenar_strings(retorno, "(");
-	retorno = concatenar_strings(retorno, parametros_opc);
+
+    no_parametro_t* parametro_atual = parametros_opc;
+    while(parametro_atual != NULL) {
+        retorno = concatenar_strings(retorno, converter_tipo_para_string(parametro_atual->tipo));
+        retorno = concatenar_strings(retorno, " ");
+        retorno = concatenar_strings(retorno, parametro_atual->id);
+        if(parametro_atual->proximo != NULL) {
+            retorno = concatenar_strings(retorno, ", ");
+        }
+        parametro_atual = parametro_atual->proximo;
+    }
 
     retorno = concatenar_strings(retorno, "){\n");
 	retorno = concatenar_strings(retorno, comandos_opc);
-
-	retorno = concatenar_strings(retorno, ")}\n");
+    retorno = concatenar_strings(retorno, "\n");
+    retorno = concatenar_strings(retorno, exp_retorne->codigo);
+	retorno = concatenar_strings(retorno, "}\n");
 	return retorno;
 }
 
-char* gerar_procedimento(char* id, char* parametros_opc, char* comandos_opc) {
+char* gerar_procedimento(char* id, no_parametro_t* parametros_opc, char* comandos_opc) {
 	char* retorno = "";
 	retorno = concatenar_strings(retorno, "void");
 	retorno = concatenar_strings(retorno, " ");
 	retorno = concatenar_strings(retorno, id);
 	retorno = concatenar_strings(retorno, "(");
-	retorno = concatenar_strings(retorno, parametros_opc);
+
+    no_parametro_t* parametro_atual = parametros_opc;
+    while(parametro_atual != NULL) {
+        retorno = concatenar_strings(retorno, converter_tipo_para_string(parametro_atual->tipo));
+        retorno = concatenar_strings(retorno, " ");
+        retorno = concatenar_strings(retorno, parametro_atual->id);
+        if(parametro_atual->proximo != NULL) {
+            retorno = concatenar_strings(retorno, ", ");
+        }
+        parametro_atual = parametro_atual->proximo;
+    }
 
     retorno = concatenar_strings(retorno, "){\n");
 	retorno = concatenar_strings(retorno, comandos_opc);
-
-	retorno = concatenar_strings(retorno, ")}\n");
+	retorno = concatenar_strings(retorno, "}\n");
     return retorno;
 }
 
-char * gerar_principal(char* comandos_opc){
+char* gerar_principal(char* comandos_opc){
 	char* retorno = "int main(){\n";
 	retorno = concatenar_strings(retorno, comandos_opc);
 	retorno = concatenar_strings(retorno, "return 0;");
@@ -532,18 +608,18 @@ char* gerar_includes() {
     return retorno;
 }
 
-char* gerar_comparar_char(char primeira, char segunda){
-    char* primeira_str = (char*) malloc(2 * sizeof(char));  //Dar free?
-    char* segunda_str = (char*) malloc(2 * sizeof(char));  //Dar free?
+char* gerar_comparar_char(char* primeira, char* segunda){
+    // char* primeira_str = (char*) malloc(2 * sizeof(char));  //Dar free?
+    // char* segunda_str = (char*) malloc(2 * sizeof(char));  //Dar free?
 
-    sprintf(primeira_str, "%c", primeira);
-    sprintf(segunda_str, "%c", segunda);
+    // sprintf(primeira_str, "%c", primeira);
+    // sprintf(segunda_str, "%c", segunda);
 
     char* retorno = "";
     retorno = concatenar_strings(retorno, "(");
-    retorno = concatenar_strings(retorno,primeira_str);
+    retorno = concatenar_strings(retorno,primeira);
     retorno = concatenar_strings(retorno,"==");
-    retorno = concatenar_strings(retorno,segunda_str);
+    retorno = concatenar_strings(retorno,segunda);
     retorno = concatenar_strings(retorno, ")");
     return retorno;
 }

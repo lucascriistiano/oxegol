@@ -100,6 +100,9 @@ tipo_t verificar_tipo_retorno(no_operador_t* operador, tipo_t tipo);
 
 int verificar_cast(tipo_t tipo_origem, tipo_t tipo_destino);
 
+char* converter_literal_para_string(no_literal_t* literal);
+char* converter_tipo_para_string(tipo_t tipo);
+
 char* concatenar_strings(char* primeira, char* segunda);
 char* gerar_label(char* comando, int numero);
 int escrever_arquivo_c(char* codigo);
@@ -119,11 +122,11 @@ char* gerar_escolha(char* id, char* caso_um_mais, char* caso_contrario);
 char* gerar_caso(char* valor, char* comandos);
 char* gerar_caso_contrario(char* comandos);
 char* gerar_se(int nse, se_t* ses);
-char* gerar_comparar_char(char primeira, char segunda);
-char* gerar_comparar_strings( char* primeira, char* segunda);
+char* gerar_comparar_char(char* primeira, char* segunda);
+char* gerar_comparar_strings(char* primeira, char* segunda);
 char* gerar_principal(char* comandos_opc);
-char* gerar_procedimento( char* id, char* parametros_opc, char* comandos_opc);
-char* gerar_funcao(char* id, char* parametros_opc, char* tipo, char* comandos_opc);
+char* gerar_procedimento(char* id, no_parametro_t* parametros_opc, char* comandos_opc);
+char* gerar_funcao(char* id, no_parametro_t* parametros_opc, tipo_t tipo, char* comandos_opc, no_expressao_t* exp_retorne);
 char* gerar_declaracao_ca(char* tipo, char* variavel, char* inicializacao);
 char* gerar_declaracao_sa(char* tipo, char* variavel);
 char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito);
