@@ -1,17 +1,19 @@
 funcao fatorial(inteiro numero) -> inteiro {
+    inteiro retorno;
     se(numero > 1){
-        retorne numero * fatorial(numero - 1);
+        retorno = numero * fatorial(numero - 1);
     }
     senao {
-        retorne 1;
+        retorno = 1;
     }
-}
 
+    retorne retorno;
+}
 
 principal() {
     inteiro numero;
-    imprima("Fatorial de qual numero?:")
+    imprima("Fatorial de qual numero? ");
     leia(numero);
-    
+
     imprima(fatorial(numero));
 }

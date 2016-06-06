@@ -102,7 +102,7 @@ digitos [0-9]+
 {digitos}                                 { yylval.valor.ival = atoi(yytext); return LITERAL_INTEIRO; }
 (({digitos}\.[0-9]*)|([0-9]*\.{digitos})) { yylval.valor.fval = atof(yytext); return LITERAL_REAL; }
 ("verdadeiro"|"falso")                    { if(strcmp(yytext, "verdadeiro") == 0) { yylval.valor.bval = 1; } else { yylval.valor.bval = 0; } return LITERAL_BOOLEANO; }
-\"[a-zA-Z0-9\_\ ]*\"                      { yylval.valor.sval = strdup(yytext); return LITERAL_STRING; }
+\"(\\.|[^"])*\"                           { yylval.valor.sval = strdup(yytext); return LITERAL_STRING; }
 '.'                                       { yylval.valor.cval = yytext[1]; return LITERAL_CARACTERE; }
 
 [a-zA-Z][a-zA-Z0-9\_]* { yylval.id = strdup(yytext); return ID; }

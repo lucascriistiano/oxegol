@@ -1,43 +1,50 @@
 principal(){
     real numA, numB;
     caractere operador;
-    
-    imprima("Operadores permitidos");
-    imprima("+: soma");
-    imprima("-: subtracao");
-    imprima("*: multiplicacao");
-    imprima("/: divisao");
-    imprima("%: modulo");
-    
-    imprima("Digite a sua operacao na forma: valor1 operacao valor2");
-    
+
+    imprima("Operadores permitidos", "\n");
+    imprima("+: soma", "\n");
+    imprima("-: subtracao", "\n");
+    imprima("*: multiplicacao", "\n");
+    imprima("/: divisao", "\n");
+    imprima("%: modulo", "\n");
+
+    imprima("Digite a sua operacao (valor1 operador valor2).", "\n");
+
+    imprima("valor 1: ");
     leia(numA);
-    leia(operacao);
+
+    leia(operador);
+    imprima("operador: ");
+    leia(operador);
+
+    imprima("valor 2: ");
     leia(numB);
-    
-    escolha(operacao) {
+
+    escolha(operador) {
         caso '+':
-            imprima("Resultado:");
+            imprima("Resultado: ");
             imprima(numA + numB);
             pare;
         caso '-':
-            imprima("Resultado:");
+            imprima("Resultado: ");
             imprima(numA - numB);
             pare;
         caso '*':
-            imprima("Resultado:");
+            imprima("Resultado: ");
             imprima(numA * numB);
             pare;
         caso '/':
+            imprima("Resultado: ");
             imprima(numA / numB);
-            pare;    
+            pare;
         caso '%':
-            imprima("Resultado:");
-            imprima(numA % numB);
+            imprima("Resultado: ");
+            imprima((inteiro) numA % ((inteiro) numB));
             pare;
         casocontrario:
             imprima("Comando invalido");
             pare;
     }
-    
+
 }

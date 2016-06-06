@@ -1,22 +1,24 @@
 funcao fibonacci(inteiro numero) -> inteiro {
+    inteiro retorno;
     se(numero == 0){
-        retorne 0;
+        retorno = 0;
     }
     senao se(numero==1){
-        retorne 1;
+        retorno = 1;
     }
     senao se(numero > 1){
-        retorne fibonacci(numero -1) + fibonacci(numero-2);
+        retorno = fibonacci(numero -1) + fibonacci(numero-2);
     }
+    retorne retorno;
 }
 
-principal(){
+principal() {
     inteiro numero, contador;
-    imprima("Digite um valor para a sequencia de Fobonacci:");
+    imprima("Digite um valor para a sequencia de Fibonacci: ");
     leia(numero);
-    imprima("A sequencia eh:");
-    
+    imprima("A sequencia eh: ");
+
     para (contador de 0 ate numero) {
-        imprima(fibonacci(contador+1));
+        imprima(fibonacci(contador+1), "\n");
     }
 }

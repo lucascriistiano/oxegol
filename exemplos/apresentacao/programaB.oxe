@@ -46,22 +46,22 @@ procedimento busca(ref inteiro vetor, inteiro tamanho, inteiro elemento) {
 
 principal (){
 	inteiro tamanho;
-	imprima("Digite o tamanho do seu vetor:");
+	imprima("Digite o tamanho do seu vetor: ");
 	leia(tamanho);
 
     inteiro[tamanho] vetor;
 
     inteiro cont;
     inteiro aux;
-    para(cont de 0 ate tamanho){
+    para(cont de 0 ate tamanho) {
     	leia(aux);
     	vetor[cont] = aux;
     }
 
     inteiro elemento;
-    imprima("Qual elemento você busca nesse vetor?:")
+    imprima("Qual elemento você busca nesse vetor?: ")
     leia(elemento);
-    
+
     quickSort(vetor, vetor[0], vetor[tamanho - 1]);
     buca(vetor,tamanho,elemento);
 }

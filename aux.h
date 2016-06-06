@@ -129,10 +129,10 @@ char* gerar_procedimento(char* id, no_parametro_t* parametros_opc, char* comando
 char* gerar_funcao(char* id, no_parametro_t* parametros_opc, tipo_t tipo, char* comandos_opc, no_expressao_t* exp_retorne);
 
 char* gerar_declaracao(tipo_t tipo, no_indice_array_t* indices_array_opc, no_variavel_t* variaveis);
-char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito);
+// char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito);
 char* gerar_imprima(no_expressao_t* expressoes);
 char* gerar_leia(char* id, tipo_t tipo);
-char* gerar_concatena_texto(char* destino,char* primeira, char* segunda);
+char* gerar_concatena_texto(char* destino, char* primeira, char* segunda);
 char* gerar_includes();
 char* gerar_expressao_binaria(char* lado_esquerdo, char* lado_direito, char* operador);
 char* gerar_expressao_binaria_parentizada(char* lado_esquerdo_parentizado, char* lado_direito, char* operador);

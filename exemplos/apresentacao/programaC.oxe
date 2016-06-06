@@ -1,45 +1,40 @@
-principal(){
-    inteiro  linhas, colunas;
-    imprima("Digite o numero de linhas:");
+principal() {
+    inteiro linhas, colunas;
+    imprima("Digite o numero de linhas: ");
     leia(linhas);
-    imprima("Digite o numero de colunas:");
+    imprima("Digite o numero de colunas: ");
     leia(colunas);
-    
-    inteiro matrizA[linhas][colunas];
-    inteiro matrizB[linhas][colunas];
-    inteiro matrizC[linhas][colunas];
-    
-    inteiro i,j;
-    
+
+    inteiro[linhas][colunas] matrizA;
+    inteiro[linhas][colunas] matrizB;
+    inteiro[linhas][colunas] matrizC;
+
+    inteiro i, j;
+
      para(i de 0 ate linhas) {
         para(j de 0 ate colunas) {
-            imprima("Digite os valores da primeira matriz:");
+            imprima("Digite os valores da primeira matriz: ");
             leia(matrizA[i][j]);
         }
     }
-    
+
     para(i de 0 ate linhas) {
         para(j de 0 ate colunas) {
-            imprima("Digite os valores da segunda matriz:");
+            imprima("Digite os valores da segunda matriz: ");
             leia(matrizB[i][j]);
         }
     }
-    
-    
-    
-    
+
     para(i de 0 ate linhas) {
         para(j de 0 ate colunas) {
             matrizC[i][j] = matrizA[i][j] * matrizB[i][j];
         }
     }
-    
-    
+
     para(i de 0 ate linhas) {
         para(j de 0 ate colunas) {
             imprima("Matriz resultante:")
             imprima(matrizC[i][j]);
         }
     }
-    
 }

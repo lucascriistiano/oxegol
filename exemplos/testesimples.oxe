@@ -5,14 +5,20 @@ inteiro g;
 
 procedimento teste(inteiro a) {
     se(a > 1000) {
-        imprima("maior que 1000");
+        imprima("a > 1000");
     } senao se(a > 100) {
-        imprima("maior que 100");
+        imprima("a > 100");
     } senao {
-        imprima("menor igual que 100");
+        imprima("a <= 100");
+    }
+    a--;
+    se(a > 0) {
+        teste(a);
     }
 }
 
 principal() {
-    imprima(verdadeiro e 1);
+    inteiro a = 1000;
+    leia(a);
+    teste(a);
 }

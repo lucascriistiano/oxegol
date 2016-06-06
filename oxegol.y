@@ -21,10 +21,15 @@
   int num_se = 0;
 
   void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis);
+  void verificar_tipos_atribuicao(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis);
   void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros);
   void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual, no_parametro_t* parametros);
   void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, no_expressao_t *argumentos);
   void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retornado);
+  int verificar_concatena_texto(char* id, no_expressao_t* primeira, no_expressao_t* segunda);
+
+  void erro_variavel_nao_declarada(char* id);
+  void erro_redefinicao_variavel(char* id);
 %}
 
 %union {
@@ -91,6 +96,7 @@ declaracoes_var: declaracao_var PONTO_E_VIRGULA                   { $$ = concate
                ;
 
 declaracao_var: tipo indices_array_opc var_declaradas { declarar_variaveis(escopo_variaveis_atual, $1, $2, $3);
+                                                        verificar_tipos_atribuicao(escopo_variaveis_atual, $1, $2, $3);
                                                         $$ = gerar_declaracao($1, $2, $3);
                                                       }
               ;
@@ -111,7 +117,7 @@ atribuicao_opc: /* vazio */   { $$ = NULL; }
               | atribuicao    { $$ = $1; }
               ;
 
-atribuicao: ATRIBUICAO expressao  { char* codigo_atribuicao = concatenar_strings("=", $2->codigo);
+atribuicao: ATRIBUICAO expressao  { char* codigo_atribuicao = concatenar_strings(" = ", $2->codigo);
                                     no_expressao_t* no_expressao = criar_no_expressao(codigo_atribuicao, $2->tipo);
                                     $$ = no_expressao;
                                   }
@@ -172,8 +178,7 @@ instrucao: PARE                                 { $$ = "break"; }
          | declaracao_var                       { $$ = $1; }
          | ID indices_array_opc atribuicao      { /* TODO Verificar se o id está declarado e dentro dos limites declarados */
                                                   /* TODO Gerar e retornar código de atribuicao */
-                                                  /* $$ = gerar_atribuicao($1, $2, $3); */
-                                                  $$ = "atribuicao";
+                                                  $$ = concatenar_strings($1, $3->codigo);
                                                 }
          | ID incremento                        { variavel_t* variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $1);
                                                   if(variavel_encontrada != NULL) {
@@ -187,6 +192,7 @@ instrucao: PARE                                 { $$ = "break"; }
                                                     char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $1) + 1);
                                                     sprintf(message, "Variável '%s' não declarada", $1);
                                                     yyerror(message);
+                                                    free(message);
                                                   }
                                                 }
          | ID decremento                        { variavel_t* variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $1);
@@ -201,6 +207,7 @@ instrucao: PARE                                 { $$ = "break"; }
                                                     char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $1) + 1);
                                                     sprintf(message, "Variável '%s' não declarada", $1);
                                                     yyerror(message);
+                                                    free(message);
                                                   }
                                                 }
          | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3);
@@ -217,6 +224,7 @@ instrucao: PARE                                 { $$ = "break"; }
                                                     char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $3) + 1);
                                                     sprintf(message, "Variável '%s' não declarada", $3);
                                                     yyerror(message);
+                                                    free(message);
                                                   }
                                                 }
          | COMPARATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR { if($3->tipo != $5->tipo) {
@@ -229,7 +237,10 @@ instrucao: PARE                                 { $$ = "break"; }
                                                                               yyerror("Tipo não suportado. Comando aceita apenas tipos 'string' e 'caractere'");
                                                                             }
                                                                           }
-         | ID indices_array_opc ATRIBUICAO CONCATENATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR  { $$ = "concatena_texto"; /* $$ = gerar_concatena_texto($1, $2, $6, $8); */ } //Desalocar a variavel
+         | ID indices_array_opc ATRIBUICAO CONCATENATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR  { if(verificar_concatena_texto($1, $6, $8) == 1) {
+                                                                                                                 $$ = gerar_concatena_texto($1, $6->codigo, $8->codigo);
+                                                                                                               }
+                                                                                                             }
          ;
 
 incremento: INCREMENTO  { no_operador_t* operadores = criar_no_operador("++", inteiro, inteiro, 1); $$ = operadores; }
@@ -412,9 +423,9 @@ operador_logico_unario: NAO_LOGICO   { no_operador_t* operadores = criar_no_oper
                       | NAO_BITS     { no_operador_t* operadores = criar_no_operador("~", inteiro, inteiro, 1); $$ = operadores; }
                       ;
 
-terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { if(verificar_cast($4->tipo, $2) == 1) {  //Verificar se o terminal pode ser convertido nesse tipo
-                                                              //Adicionar geracao de codigo com cast
-                                                              $$ = criar_no_expressao($4->codigo, $2); //Substituir primeiro parametro pelo codigo gerado
+terminal_exp_cast_opc: PAR_ESQ tipo PAR_DIR terminal_exp  { if(verificar_cast($4->tipo, $2) == 1) {
+                                                              char* codigo_cast = gerar_cast($4, $2);
+                                                              $$ = criar_no_expressao(codigo_cast, $2);
                                                             } else {
                                                               yyerror("Conversão entre tipos não suportada");
                                                             }
@@ -429,9 +440,7 @@ terminal_exp: literal                              { char* literal_em_string = c
                                                      if((variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $1)) != NULL) {
                                                        $$ = criar_no_expressao(variavel_encontrada->id, variavel_encontrada->tipo);
                                                      } else {
-                                                       char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $1) + 1);
-                                                       sprintf(message, "Variável '%s' não declarada", $1);
-                                                       yyerror(message);
+                                                       erro_variavel_nao_declarada($1);
                                                        $$ = criar_no_expressao($1, vazio); //Retorna variável com tipo vazio para variável não declarada
                                                      }
                                                    }
@@ -490,7 +499,6 @@ int main (int argc, char *argv[]) {
 
 int yyerror(char* msg) {
   fprintf (stderr, "Linha %d: Próximo de '%s'. %s.\n", yylineno, yytext, msg);
-  free(msg);
   return 0;
 }
 
@@ -504,19 +512,26 @@ void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo,
         printf("DECLAROU '%s'\n", no_variavel_atual->id);
       }
     } else {
-      char* message = malloc(snprintf(NULL, 0, "Redefinição da variavel '%s'", variavel_encontrada->id) + 1);
-      sprintf(message, "Redefinição da variavel '%s'", variavel_encontrada->id);
-      yyerror(message);
+      erro_redefinicao_variavel(variavel_encontrada->id);
     }
     no_variavel_atual = no_variavel_atual->proximo;
   }
+}
 
+void verificar_tipos_atribuicao(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis) {
   //Fazer verificação de tipos para cada variavel inicializada
-  // if($1 != $3) {
-  //   printf("Tipos incompatíveis\n");
-  // } else {
-  //   printf("Compatíveis\n");
-  // }
+  no_variavel_t* no_variavel_atual = variaveis;
+  while(no_variavel_atual != NULL) {
+    variavel_t* variavel_encontrada = consulta_escopo_atual(escopo_variaveis_atual, no_variavel_atual->id);
+    if(variavel_encontrada != NULL) {
+      if(no_variavel_atual->tipo != vazio && variavel_encontrada->tipo != no_variavel_atual->tipo) {
+        yyerror("Tipos incompatíveis");
+      }
+    } else {
+      erro_variavel_nao_declarada(no_variavel_atual->id);
+    }
+    no_variavel_atual = no_variavel_atual->proximo;
+  }
 }
 
 void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros) {
@@ -530,6 +545,7 @@ void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo
     char* message = malloc(snprintf(NULL, 0, "Redefinição do subprograma '%s'", subprograma_encontrado->id) + 1);
     sprintf(message, "Redefinição do subprograma '%s'", subprograma_encontrado->id);
     yyerror(message);
+    free(message);
   }
 }
 
@@ -544,9 +560,7 @@ void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual,
           printf("DECLAROU %s NO SUBPROGRAMA\n", no_parametro_atual->id);
         }
       } else {
-        char* message = malloc(snprintf(NULL, 0, "Redefinição da variavel '%s'", variavel_encontrada->id) + 1);
-        sprintf(message, "Redefinição da variavel '%s'", variavel_encontrada->id);
-        yyerror(message);
+        erro_redefinicao_variavel(no_parametro_atual->id);
       }
       no_parametro_atual = no_parametro_atual->proximo;
     }
@@ -573,17 +587,20 @@ void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char*
           char* message = malloc(snprintf(NULL, 0, "Tipo incorreto recebido na posição %d da chamada para o subprograma '%s'", i, id) + 1);
           sprintf(message, "Tipo incorreto recebido na posição %d da chamada para o subprograma '%s'", i, id);
           yyerror(message);
+          free(message);
         }
       }
     } else {
       char* message = malloc(snprintf(NULL, 0, "Chamada para subprograma '%s' com número errado de argumentos. Esperava %d mas recebeu %d", id, subprograma_encontrado->num_parametros, num_args) + 1);
       sprintf(message, "Chamada para subprograma '%s' com número errado de argumentos. Esperava %d mas recebeu %d", id, subprograma_encontrado->num_parametros, num_args);
       yyerror(message);
+      free(message);
     }
   } else {
     char* message = malloc(snprintf(NULL, 0, "Chamada para subprograma '%s' não declarado", id) + 1);
     sprintf(message, "Chamada para subprograma '%s' não declarado", id);
     yyerror(message);
+    free(message);
   }
 }
 
@@ -592,5 +609,46 @@ void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retor
     char* message = malloc(snprintf(NULL, 0, "Tipo incorreto retornado na função '%s'", id) + 1);
     sprintf(message, "Tipo incorreto retornado na função '%s'", id);
     yyerror(message);
+    free(message);
   }
+}
+
+int verificar_concatena_texto(char* id, no_expressao_t* primeira, no_expressao_t* segunda) {
+  variavel_t* var_destino = consulta_escopos(escopo_variaveis_atual, id);
+  if(var_destino != NULL) {
+    int retorno = 0;
+    if(var_destino->tipo != string) {
+      yyerror("Variável destino deve ser do tipo 'string'");
+    }
+
+    if(primeira->tipo != string) {
+      yyerror("Primeiro argumento não é tipo 'string'");
+    }
+    if(segunda->tipo != string) {
+      yyerror("Segundo argumento não é tipo 'string'");
+    }
+
+    if(var_destino->tipo != string || primeira->tipo != string || segunda->tipo != string) {
+      return 0;
+    }
+
+    return 1;
+  } else {
+    erro_variavel_nao_declarada(id);
+    return 0;
+  }
+}
+
+void erro_variavel_nao_declarada(char* id) {
+  char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", id) + 1);
+  sprintf(message, "Variável '%s' não declarada", id);
+  yyerror(message);
+  free(message);
+}
+
+void erro_redefinicao_variavel(char* id) {
+  char* message = malloc(snprintf(NULL, 0, "Redefinição da variavel '%s'", id) + 1);
+  sprintf(message, "Redefinição da variavel '%s'", id);
+  yyerror(message);
+  free(message);
 }

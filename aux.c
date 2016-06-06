@@ -19,6 +19,7 @@ no_literal_t* criar_no_literal(tipo_t tipo, valor_t valor) {
 
     case caractere:
       no->valor.cval = valor.cval;
+      break;
 
     case string:
       no->valor.sval = strdup(valor.sval);  //Criar cópia e desalocar quando for do tipo string
@@ -198,7 +199,7 @@ char* converter_literal_para_string(no_literal_t* literal) {
 
     case caractere:
       literal_string = malloc(snprintf(NULL, 0, "%c", literal->valor.cval) + 1);
-      sprintf(literal_string, "%c", literal->valor.cval);
+      sprintf(literal_string, "'%c'", literal->valor.cval);
       break;
 
     case string:
@@ -247,16 +248,34 @@ char* concatenar_strings(char* primeira, char* segunda) {
     return resultado;
 }
 
-char* gerar_concatena_texto(char* destino,char* primeira, char* segunda){
+char* gerar_concatena_texto(char* destino, char* primeira, char* segunda){
     char *retorno = "";
+
+    //Desalocar se estiver previamente alocada
+    retorno = concatenar_strings(retorno, "if(");
+    retorno = concatenar_strings(retorno, destino);
+    retorno = concatenar_strings(retorno, " != NULL) {\n");
+    retorno = concatenar_strings(retorno, "free(");
+    retorno = concatenar_strings(retorno, destino);
+    retorno = concatenar_strings(retorno, ");\n");
+    retorno = concatenar_strings(retorno, "}\n");
+
+    //Aloca tamanho para variaveis
+    retorno = concatenar_strings(retorno, destino);
+    retorno = concatenar_strings(retorno, " = malloc(snprintf(NULL, 0, \"%s%s\", ");
+    retorno = concatenar_strings(retorno, primeira);
+    retorno = concatenar_strings(retorno, ", ");
+    retorno = concatenar_strings(retorno, segunda);
+    retorno = concatenar_strings(retorno, ") + 1);\n");
+
+    //Concatena
     retorno = concatenar_strings(retorno, "sprintf(");
     retorno = concatenar_strings(retorno, destino);
-    retorno = concatenar_strings(retorno, ",");
-    retorno = concatenar_strings(retorno, "%s%s");
-    retorno = concatenar_strings(retorno, ",");
-    retorno = concatenar_strings(retorno, "primeira");
-    retorno = concatenar_strings(retorno, ",");
-    retorno = concatenar_strings(retorno, "segunda");
+    retorno = concatenar_strings(retorno, ", ");
+    retorno = concatenar_strings(retorno, "\"%s%s\", ");
+    retorno = concatenar_strings(retorno, primeira);
+    retorno = concatenar_strings(retorno, ", ");
+    retorno = concatenar_strings(retorno, segunda);
     retorno = concatenar_strings(retorno, ");\n");
     return retorno;
 }
@@ -562,7 +581,23 @@ char* gerar_comparar_char(char* primeira, char* segunda){
 }
 
 char* gerar_leia(char* id, tipo_t tipo){
-    char* retorno = "scanf(\"";
+    char* retorno = "";
+    if(tipo == string) {
+        //Desalocar se estiver previamente alocada
+        retorno = concatenar_strings(retorno, "if(");
+        retorno = concatenar_strings(retorno, id);
+        retorno = concatenar_strings(retorno, " != NULL) {\n");
+        retorno = concatenar_strings(retorno, "free(");
+        retorno = concatenar_strings(retorno, id);
+        retorno = concatenar_strings(retorno, ");\n");
+        retorno = concatenar_strings(retorno, "}\n");
+
+        //Aloca tamanho de 255 bytes para leitura
+        retorno = concatenar_strings(retorno, id);
+        retorno = concatenar_strings(retorno, " = (char*) malloc(255 * sizeof(char));\n");
+    }
+
+    retorno = concatenar_strings(retorno, "scanf(\"");
     switch(tipo){
         case inteiro:
             retorno = concatenar_strings(retorno, "%d");
@@ -584,7 +619,10 @@ char* gerar_leia(char* id, tipo_t tipo){
             break;
     }
 
-    retorno = concatenar_strings(retorno,"\", &");
+    retorno = concatenar_strings(retorno,"\", ");
+    if(tipo != string) {
+        retorno = concatenar_strings(retorno,"&");
+    }
     retorno = concatenar_strings(retorno, id);
     retorno = concatenar_strings(retorno, ");\n");
     return retorno;
@@ -637,7 +675,6 @@ char* gerar_imprima(no_expressao_t* expressoes){
     }
 
     retorno = concatenar_strings(retorno, ");\n");
-    retorno = concatenar_strings(retorno, "printf(\"\\n\");");
     return retorno;
 }
 
@@ -672,14 +709,14 @@ char* gerar_expressao_unaria(char* lado_esquerdo, char* operador){
     return retorno;
 }
 
-char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito ){
-	char* retorno = "";
-	retorno = concatenar_strings(retorno, lado_esquerdo);
-	retorno = concatenar_strings(retorno, " = ");
-	retorno = concatenar_strings(retorno, lado_direito);
-	retorno = concatenar_strings(retorno, ";\n");
-    return retorno;
-}
+// char* gerar_atribuicao(char* lado_esquerdo, char* lado_direito ){
+// 	char* retorno = "";
+// 	retorno = concatenar_strings(retorno, lado_esquerdo);
+// 	retorno = concatenar_strings(retorno, " = ");
+// 	retorno = concatenar_strings(retorno, lado_direito);
+// 	retorno = concatenar_strings(retorno, ";\n");
+//     return retorno;
+// }
 
 char * gerar_incremento(char* id){
 	char* retorno = "";

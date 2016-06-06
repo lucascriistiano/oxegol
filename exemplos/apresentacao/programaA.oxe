@@ -1,30 +1,27 @@
 principal() {
-    
     inteiro i;
-    real r;
-    booleano b;
-    string s;
-    caractere c;
-    
-    imprima("Digite um numero inteiro:");
+    imprima("Digite um numero inteiro: ");
     leia(i);
-    imprima("Digite um numero real:");
+
+    real r;
+    imprima("Digite um numero real: ");
     leia(r);
-    imprima("Digite um valor booleano: vedaderio ou falso");
+
+    booleano b;
+    imprima("Digite um valor booleano (0 ou 1): ");
     leia(b);
-    imprima("Digite uma palavra:");
+
+    string s;
+    imprima("Digite uma string: ");
     leia(s);
-    imprima("Digite um caractere:");
+
+    caractere c;
+    imprima("Digite um caractere: ");
     leia(c);
-    
-    imprima("Seu numero inteiro eh:");
-    imprima(i);
-    imprima("Seu numero real eh:");
-    imprima(r);
-    imprima("Seu valor booleano eh:");
-    imprima(b);
-    imprima("Sua palavra eh:");
-    imprima(s);
-    imprima("Seu caractere eh:");
-    imprima(c);
+
+    imprima("Seu numero inteiro eh: ", i, "\n");
+    imprima("Seu numero real eh: ", r, "\n");
+    imprima("Seu valor booleano eh: ", b, "\n");
+    imprima("Sua string eh: ", s, "\n");
+    imprima("Seu caractere eh: ", c, "\n");
 }
