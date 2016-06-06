@@ -1,7 +1,0 @@
-- Precisa verificação de limites de arranjos em tempo de compilação?
-- Declaração de um array com variável ou expressão (Tem que fazer? Como verificar os tamanhos?)
-- Usar YACC ou Bison? -> Error reporting
-
-Apresentação:
-- Operações com matrizes na apresentação: operação nativa ou código da linguagem para fazer isso?
-- Como assim? (C) Gerar fontes que incluam instruções que originam conflito shift-reduce. Ações corretas?
