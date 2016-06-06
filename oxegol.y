@@ -16,16 +16,14 @@
   escopo_variaveis_t *escopo_variaveis_atual;
   hash_subprogramas_t *hash_subprogramas;
 
-
   int num_enquanto = 0;
-
+  int num_para = 0;
 
   void declarar_variaveis(escopo_variaveis_t* escopo_variaveis_atual, tipo_t tipo, no_indice_array_t* indices_array, no_variavel_t* variaveis);
   void declarar_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, tipo_t retorno, no_parametro_t *parametros);
   void declarar_parametros_subprograma(escopo_variaveis_t* escopo_variaveis_atual, no_parametro_t* parametros);
   void verificar_chamada_subprograma(hash_subprogramas_t* hash_subprogramas, char* id, no_expressao_t *argumentos);
   void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retornado);
-  char* converter_literal_para_string(no_literal_t* literal);
 %}
 
 %union {
@@ -168,28 +166,71 @@ comando: se                          { $$ = $1; }
 
 instrucao: PARE                                 { $$ = "break"; }
          | declaracao_var                       { $$ = $1; }
-         | ID indices_array_opc atribuicao      { /* Verificar se o id está declarado e os limites */ $$ = "atribuicao";  /* $$ = gerar_atribuicao($1, $2, $3); */ } //Verificar: se id está declarado para todos IDs
-         | ID incremento                        { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, inteiro); //só para testes mudar
-                                                  //int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
-                                                  if(operando_compativel) {
-                                                    $$ = "incremento";
+         | ID indices_array_opc atribuicao      { /* TODO Verificar se o id está declarado e dentro dos limites declarados */
+                                                  /* TODO Gerar e retornar código de atribuicao */
+                                                  /* $$ = gerar_atribuicao($1, $2, $3); */
+                                                  $$ = "atribuicao";
+                                                }
+         | ID incremento                        { variavel_t* variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $1);
+                                                  if(variavel_encontrada != NULL) {
+                                                    int operando_compativel = verificar_compatibilidade_operacao_unaria($2, variavel_encontrada->tipo);
+                                                    if(operando_compativel) {
+                                                      /* TODO Gerar e retornar código com incremento */
+                                                      $$ = "incremento";
+                                                    } else {
+                                                      yyerror("Tipo não suportado");
+                                                    }
                                                   } else {
-                                                    yyerror("Tipo não suportado");
+                                                    char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $1) + 1);
+                                                    sprintf(message, "Variável '%s' não declarada", $1);
+                                                    yyerror(message);
                                                   }
                                                 }
-         | ID decremento                        { int operando_compativel = verificar_compatibilidade_operacao_unaria($2, inteiro); //Só para testes mudar
-                                                  //int operando_compativel = verificar_compatibilidade_operacao_unaria($2, $1);
-                                                  if(operando_compativel) {
-                                                    $$ = "decremento";
+         | ID decremento                        { variavel_t* variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $1);
+                                                  if(variavel_encontrada != NULL) {
+                                                    int operando_compativel = verificar_compatibilidade_operacao_unaria($2, variavel_encontrada->tipo);
+                                                    if(operando_compativel) {
+                                                      /* TODO Gerar e retornar código com incremento */
+                                                      $$ = "decremento";
+                                                    } else {
+                                                      yyerror("Tipo não suportado");
+                                                    }
                                                   } else {
-                                                    yyerror("Tipo não suportado");
+                                                    char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $1) + 1);
+                                                    sprintf(message, "Variável '%s' não declarada", $1);
+                                                    yyerror(message);
                                                   }
                                                 }
-         | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3); /* gerar e retornar string de chamada de subproc */ $$ = "instSubprograma(argumentos)"; }
-         | ID campos_registro atribuicao        { /* gerar e retornar string de atribuicao a registro */ $$ = "registro.campo = valor"; }
-         | IMPRIMA PAR_ESQ argumentos PAR_DIR   { /* gerar e retornar string do comando do imprima */ $$ = "imprima"; }
-         | LEIA PAR_ESQ ID PAR_DIR              { /* gerar e retornar string do comando do leia */ $$ = "leia"; }
-         | COMPARATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR {  }
+         | ID PAR_ESQ argumentos_opc PAR_DIR    { verificar_chamada_subprograma(hash_subprogramas, $1, $3);
+                                                  /* TODO Gerar e retornar código de chamada de subproc */
+                                                  $$ = "instSubprograma(argumentos)";
+                                                }
+         | ID campos_registro atribuicao        { /* TODO Gerar e retornar código de atribuicao do registro */
+                                                  $$ = "registro.campo = valor";
+                                                }
+         | IMPRIMA PAR_ESQ argumentos PAR_DIR   { /* TODO Gerar e retornar código do comando do imprima */
+                                                  $$ = "imprima";
+                                                }
+         | LEIA PAR_ESQ ID PAR_DIR              { variavel_t* variavel_encontrada = consulta_escopos(escopo_variaveis_atual, $3);
+                                                  if(variavel_encontrada != NULL) {
+                                                    /* TODO Gerar e retornar código do comando do leia */
+                                                    $$ = "leia";
+                                                  } else {
+                                                    char* message = malloc(snprintf(NULL, 0, "Variável '%s' não declarada", $3) + 1);
+                                                    sprintf(message, "Variável '%s' não declarada", $3);
+                                                    yyerror(message);
+                                                  }
+                                                }
+         | COMPARATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR { if($3->tipo != $5->tipo) {
+                                                                              yyerror("Argumentos recebidos têm tipos diferentes");
+                                                                            } else if($3->tipo == string) {
+                                                                              $$ = gerar_comparar_strings($3->codigo, $5->codigo);
+                                                                            } else if($3->tipo == caractere) {
+                                                                              $$ = gerar_comparar_char($3->codigo, $5->codigo);
+                                                                            } else {
+                                                                              yyerror("Tipo não suportado. Comando aceita apenas tipos 'string' e 'caractere'");
+                                                                            }
+                                                                          }
          | ID indices_array_opc ATRIBUICAO CONCATENATEXTO PAR_ESQ terminal_exp VIRGULA terminal_exp PAR_DIR  { $$ = "concatena_texto"; /* $$ = gerar_concatena_texto($1, $2, $6, $8); */ } //Desalocar a variavel
          ;
 
@@ -202,10 +243,10 @@ decremento: DECREMENTO  { no_operador_t* operadores = criar_no_operador("--", in
 campos_registro: PONTO ID
                | campos_registro PONTO ID
 
-declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { declarar_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc retorne { verificar_retorno_funcao($2, $7, $12->tipo); } fechamento_bloco { $$ = "declaracao_funcao"; /* gera e joga código pra cima */ }
+declaracao_func: FUNCAO ID PAR_ESQ parametros_opc PAR_DIR RETORNA tipo { declarar_subprograma(hash_subprogramas, $2, $7, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc retorne { verificar_retorno_funcao($2, $7, $12->tipo); } fechamento_bloco { $$ = gerar_funcao($2, $4, $7, $11, $12); }
                ;
 
-declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { declarar_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc fechamento_bloco { $$ = "declaracao_proc"; /* gera e joga código pra cima */ }
+declaracao_proc: PROCEDIMENTO ID PAR_ESQ parametros_opc PAR_DIR  { declarar_subprograma(hash_subprogramas, $2, vazio, $4); } abertura_bloco { declarar_parametros_subprograma(escopo_variaveis_atual, $4); } comandos_opc fechamento_bloco { $$ = gerar_procedimento($2, $4, $9); }
                ;
 
 declaracao_registro: REGISTRO ID abertura_bloco campo_um_mais fechamento_bloco { $$ = "declaracao_registro"; }
@@ -263,7 +304,9 @@ senao: SENAO abertura_bloco comandos_opc fechamento_bloco
 senao_se: SENAO se
         ;
 
-para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { $$ = "para"; }
+para: PARA PAR_ESQ ID DE expressao ATE expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { num_para++;
+                                                                                                         $$ = gerar_para(num_para, $3, $5->codigo, $7->codigo, $10);
+                                                                                                       }
     ;
 
 escolha: ESCOLHA PAR_ESQ ID PAR_DIR abertura_bloco caso_um_mais caso_contrario fechamento_bloco  { $$ = "escolha"; }
@@ -282,7 +325,9 @@ caso_opc: /* vazio */     { $$ = ""; }
 caso_contrario: CASOCONTRARIO DOIS_PONTOS comandos_opc   { /*gerar e retornar caso_contario*/ $$ = "caso_contrario"; }
               ;
 
-enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { num_enquanto++; $$ = gerar_enquanto(num_enquanto, $3->codigo, $6); }
+enquanto: ENQUANTO PAR_ESQ expressao PAR_DIR abertura_bloco comandos_opc fechamento_bloco  { num_enquanto++;
+                                                                                             $$ = gerar_enquanto(num_enquanto, $3->codigo, $6);
+                                                                                           }
         ;
 
 retorne: RETORNE expressao PONTO_E_VIRGULA { char* codigo_retorne = concatenar_strings("return ", $2->codigo);
@@ -530,40 +575,4 @@ void verificar_retorno_funcao(char* id, tipo_t retorno_funcao, tipo_t tipo_retor
     sprintf(message, "Tipo incorreto retornado na função '%s'", id);
     yyerror(message);
   }
-}
-
-char* converter_literal_para_string(no_literal_t* literal) {
-  tipo_t tipo_literal = literal->tipo;
-  char* literal_string;
-  switch(tipo_literal) {
-    case inteiro:
-      literal_string = malloc(snprintf(NULL, 0, "%d", literal->valor.ival) + 1);
-      sprintf(literal_string, "%d", literal->valor.ival);
-      break;
-
-    case real:
-      literal_string = malloc(snprintf(NULL, 0, "%f", literal->valor.fval) + 1);
-      sprintf(literal_string, "%f", literal->valor.fval);
-      break;
-
-    case booleano:
-      literal_string = malloc(snprintf(NULL, 0, "%d", literal->valor.bval) + 1);
-      sprintf(literal_string, "%d", literal->valor.bval);
-      break;
-
-    case caractere:
-      literal_string = malloc(snprintf(NULL, 0, "%c", literal->valor.cval) + 1);
-      sprintf(literal_string, "%c", literal->valor.cval);
-      break;
-
-    case string:
-      literal_string = malloc(snprintf(NULL, 0, "%s", literal->valor.sval) + 1);
-      sprintf(literal_string, "%s", literal->valor.sval);
-      break;
-
-    default:
-      printf("Tipo %u não reconhecido\n", tipo_literal);
-      return NULL;
-  }
-  return literal_string;
 }
